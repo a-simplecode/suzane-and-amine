@@ -61,7 +61,11 @@ export default function BackgroundMusic() {
       {/* Mute/Unmute Button */}
       <button
         onClick={toggleMute}
-        className="fixed bottom-4 right-4 z-50 bg-white/80 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-white/90 transition-all duration-200 border border-gray-200"
+        className={`fixed cursor-pointer bottom-4 right-4 z-50 bg-white/80 backdrop-blur-sm rounded-full p-3 hover:bg-white/90 transition-all duration-200 border border-gray-200 ${
+          !paused 
+            ? ' shadow-lg shadow-green-400/50 shadow-xl animate-pulse' 
+            : ''
+        }`}
         aria-label={paused ? "Play music" : "Pause music"}
         title={paused ? "Play music" : "Pause music"}
       >
