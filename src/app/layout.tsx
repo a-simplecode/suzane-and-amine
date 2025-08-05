@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -36,7 +36,11 @@ export const metadata: Metadata = {
     description: "You're invited to celebrate our special day on August 8th, 2026",
     images: ["/background.jpeg"],
   },
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#ffffff",
 };
 
