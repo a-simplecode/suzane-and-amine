@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { PlayIcon, PauseIcon, MusicNoteIcon } from "../icons";
 
 export default function BackgroundMusic() {
   const [paused, setPaused] = useState(true);
@@ -69,36 +70,7 @@ export default function BackgroundMusic() {
         aria-label={paused ? "Play music" : "Pause music"}
         title={paused ? "Play music" : "Pause music"}
       >
-        {paused ? (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-gray-700"
-          >
-            <polygon points="6 4 18 12 6 20 6 4" />
-          </svg>
-        ) : (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-gray-700"
-          >
-            <rect x="6" y="4" width="4" height="16" />
-            <rect x="14" y="4" width="4" height="16" />
-          </svg>
-        )}
+        {paused ? <PlayIcon /> : <PauseIcon />}
       </button>
 
       {/* Animated Music Notes */}
@@ -106,29 +78,17 @@ export default function BackgroundMusic() {
         <div className="fixed bottom-20 right-8 z-40 pointer-events-none">
           {/* Music Note 1 */}
           <div className="absolute animate-bounce" style={{ animationDelay: '0s', animationDuration: '2s' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400">
-              <path d="M9 18V5l12-2v13" />
-              <circle cx="6" cy="18" r="3" />
-              <circle cx="18" cy="16" r="3" />
-            </svg>
+            <MusicNoteIcon width={16} height={16} />
           </div>
           
           {/* Music Note 2 */}
           <div className="absolute animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '2.5s' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400" style={{ transform: 'translateX(-15px) translateY(-15px)' }}>
-              <path d="M9 18V5l12-2v13" />
-              <circle cx="6" cy="18" r="3" />
-              <circle cx="18" cy="16" r="3" />
-            </svg>
+            <MusicNoteIcon width={12} height={12} style={{ transform: 'translateX(-15px) translateY(-15px)' }} />
           </div>
           
           {/* Music Note 3 */}
           <div className="absolute animate-bounce" style={{ animationDelay: '1s', animationDuration: '1.8s' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400" style={{ transform: 'translateX(-30px) translateY(-8px)' }}>
-              <path d="M9 18V5l12-2v13" />
-              <circle cx="6" cy="18" r="3" />
-              <circle cx="18" cy="16" r="3" />
-            </svg>
+            <MusicNoteIcon width={14} height={14} style={{ transform: 'translateX(-30px) translateY(-8px)' }} />
           </div>
         </div>
       )}
