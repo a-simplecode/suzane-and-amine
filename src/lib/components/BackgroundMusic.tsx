@@ -55,6 +55,7 @@ export default function BackgroundMusic() {
     };
   }, []);
 
+
   return (
     <>
       <audio ref={audioRef} src="/Ed Sheeran - Perfect.mp3" preload="auto" />

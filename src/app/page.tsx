@@ -1,9 +1,10 @@
-import { BackgroundSlideshow } from '@/lib/components';
+import { BackgroundSlideshow, BackgroundMusic } from '@/lib/components';
 
 export default function Home() {
   return (
     <div className="font-sans min-h-screen flex items-center justify-center p-4 sm:p-8 relative">
       <BackgroundSlideshow />
+      <BackgroundMusic />
       
       {/* Main invitation card */}
       <div className="relative z-10 backdrop-blur-xs rounded-2xl shadow-2xl p-6 sm:p-8 md:p-12 max-w-2xl mx-auto text-center w-full">
