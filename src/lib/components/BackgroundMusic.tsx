@@ -57,7 +57,7 @@ export default function BackgroundMusic() {
 
   return (
     <>
-      <audio ref={audioRef} src="/song.mp3" preload="auto" />
+      <audio ref={audioRef} src="/Ed Sheeran - Perfect.mp3" preload="auto" />
       
       {/* Mute/Unmute Button */}
       <button
