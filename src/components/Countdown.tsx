@@ -28,10 +28,25 @@ function diff(target: number, now: number): Parts {
   return { days, hours, minutes, seconds, past: false };
 }
 
-const TARGET = new Date(WEDDING_DATE_ISO).getTime();
+const TARGET_DATE = new Date(WEDDING_DATE_ISO);
+const TARGET = TARGET_DATE.getTime();
+
+const WEDDING_LABEL = TARGET_DATE.toLocaleString("en-US", {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "Asia/Beirut",
+});
 
 function pad(n: number) {
   return n.toString().padStart(2, "0");
+}
+
+function plural(n: number, word: string) {
+  return `${n} ${word}${n === 1 ? "" : "s"}`;
 }
 
 export function Countdown({ mode = "corner", className }: Props) {
@@ -40,7 +55,7 @@ export function Countdown({ mode = "corner", className }: Props) {
   useEffect(() => {
     const tick = () => setParts(diff(TARGET, Date.now()));
     tick();
-    const id = setInterval(tick, mode === "big" ? 1000 : 60_000);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [mode]);
 
@@ -52,15 +67,19 @@ export function Countdown({ mode = "corner", className }: Props) {
     if (parts.past) {
       return (
         <div className={className}>
-          <span className="font-display text-sm tracking-wide">today</span>
+          <span className="font-display text-sm tracking-wide">Today is the day.</span>
         </div>
       );
     }
     return (
-      <div className={className}>
-        <span className="text-[11px] uppercase tracking-[0.15em] opacity-70">
-          {parts.days}d · {pad(parts.hours)}h
-        </span>
+      <div className={`${className ?? ""} leading-tight`}>
+        <div className="font-display text-[13px] text-ink-olive-deep">
+          {WEDDING_LABEL}
+        </div>
+        <div className="mt-0.5 text-[11px] tabular-nums opacity-70">
+          in {plural(parts.days, "day")}, {plural(parts.hours, "hour")},{" "}
+          {plural(parts.minutes, "minute")}, {plural(parts.seconds, "second")}
+        </div>
       </div>
     );
   }
