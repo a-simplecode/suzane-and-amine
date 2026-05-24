@@ -21,21 +21,21 @@ export function PaperPlane({ className }: Props) {
         </linearGradient>
       </defs>
       <polygon
-        points="10,50 90,15 60,50 90,85"
+        points="90,50 10,15 40,50 10,85"
         fill="url(#plane-grad)"
         stroke="var(--accent-olive)"
         strokeWidth="1.2"
         strokeLinejoin="round"
       />
       <polygon
-        points="60,50 90,85 55,65"
+        points="40,50 10,85 45,65"
         fill="var(--accent-olive)"
         opacity="0.18"
       />
       <line
-        x1="60"
+        x1="40"
         y1="50"
-        x2="90"
+        x2="10"
         y2="15"
         stroke="var(--accent-olive)"
         strokeWidth="1.2"

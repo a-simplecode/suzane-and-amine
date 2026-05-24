@@ -152,14 +152,14 @@ function PlaneIcon({ withSuzane }: { withSuzane: boolean }) {
   return (
     <g transform="translate(-14 -10)">
       <polygon
-        points="0,10 28,2 18,10 28,18"
+        points="28,10 0,2 10,10 0,18"
         fill="var(--bg-beige-warm)"
         stroke="var(--ink-olive-deep)"
         strokeWidth="0.8"
         strokeLinejoin="round"
       />
-      <polygon points="18,10 28,18 14,12" fill="var(--accent-olive)" opacity="0.35" />
-      <circle cx="11" cy="9" r="2" fill="var(--accent-olive-soft)" opacity={withSuzane ? 1 : 0.4} />
+      <polygon points="10,10 0,18 14,12" fill="var(--accent-olive)" opacity="0.35" />
+      <circle cx="17" cy="9" r="2" fill="var(--accent-olive-soft)" opacity={withSuzane ? 1 : 0.4} />
     </g>
   );
 }
