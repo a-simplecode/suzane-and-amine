@@ -1,5 +1,5 @@
-import { HomeScreen } from "@/screens";
+import { InvalidInvite } from "@/components/InvalidInvite";
 
 export default function Page() {
-  return <HomeScreen />;
+  return <InvalidInvite />;
 }
