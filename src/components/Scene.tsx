@@ -8,8 +8,9 @@ import { Envelope } from "./Envelope";
 import { InvitationCard } from "./InvitationCard";
 import { MusicToggle } from "./MusicToggle";
 import { PaperPlane } from "./PaperPlane";
+import { WorldMap } from "./WorldMap";
 
-type Beat = "envelope" | "card" | "plane" | "map";
+type Beat = "envelope" | "card" | "plane" | "map" | "venue";
 
 type Props = {
   invite: Invite;
@@ -58,6 +59,10 @@ export function Scene({ invite }: Props) {
     const id = setTimeout(() => setBeat("map"), 1700);
     return () => clearTimeout(id);
   }, [beat]);
+
+  const handleArrived = useCallback(() => {
+    setBeat((b) => (b === "map" ? "venue" : b));
+  }, []);
 
   return (
     <main className="relative min-h-dvh w-full overflow-hidden bg-bg-beige text-ink-olive-deep">
@@ -128,11 +133,24 @@ export function Scene({ invite }: Props) {
               key="map"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.5 } }}
+              transition={{ duration: 0.6 }}
+              className="w-full"
+            >
+              <WorldMap visible onArrived={handleArrived} />
+            </motion.div>
+          )}
+
+          {beat === "venue" && (
+            <motion.div
+              key="venue"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="w-full text-center"
             >
               <p className="text-xs uppercase tracking-[0.25em] opacity-50">
-                Flight scene next…
+                Venue card next…
               </p>
             </motion.div>
           )}
