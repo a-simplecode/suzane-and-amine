@@ -30,6 +30,7 @@ type Props = {
 
 export function Scene({ invite }: Props) {
   const [beat, setBeat] = useState<Beat>("envelope");
+  const [opened, setOpened] = useState(false);
   const [muted, setMuted] = useState(false);
   const [musicStarted, setMusicStarted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -73,14 +74,15 @@ export function Scene({ invite }: Props) {
   }, []);
 
   const openEnvelope = useCallback(() => {
-    if (beat !== "envelope") return;
+    if (beat !== "envelope" || opened) return;
+    setOpened(true);
     startMusic();
-    setTimeout(() => setBeat("card"), 1100);
-  }, [beat, startMusic]);
+    setTimeout(() => setBeat("card"), 1500);
+  }, [beat, opened, startMusic]);
 
   useEffect(() => {
     if (beat !== "card") return;
-    const id = setTimeout(() => setBeat("plane"), 3000);
+    const id = setTimeout(() => setBeat("plane"), 3200);
     return () => clearTimeout(id);
   }, [beat]);
 
@@ -114,27 +116,36 @@ export function Scene({ invite }: Props) {
       </header>
 
       <section className="relative min-h-dvh w-full grid place-items-center px-4">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
           {beat === "envelope" && (
             <motion.div
               key="envelope"
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
+              exit={{
+                opacity: 0,
+                y: 80,
+                scale: 0.82,
+                transition: { duration: 0.7, ease: [0.4, 0, 0.7, 1] },
+              }}
               transition={{ duration: 0.6 }}
-              className="w-full"
+              className="absolute inset-0 grid place-items-center px-4"
             >
-              <Envelope label={invite.label} opened={false} onTapSeal={openEnvelope} />
+              <Envelope label={invite.label} opened={opened} onTapSeal={openEnvelope} />
             </motion.div>
           )}
 
           {beat === "card" && (
             <motion.div
               key="card"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, scale: 0.45 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                transition: { duration: 1.0, ease: [0.2, 0.7, 0.2, 1] },
+              }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.4 } }}
-              className="w-full"
+              className="absolute inset-0 grid place-items-center px-4"
             >
               <InvitationCard visible />
             </motion.div>
