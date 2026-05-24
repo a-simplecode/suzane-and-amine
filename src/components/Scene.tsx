@@ -8,9 +8,21 @@ import { Envelope } from "./Envelope";
 import { InvitationCard } from "./InvitationCard";
 import { MusicToggle } from "./MusicToggle";
 import { PaperPlane } from "./PaperPlane";
+import { RsvpForm } from "./RsvpForm";
+import { ThankYou } from "./ThankYou";
+import { VenueCard } from "./VenueCard";
 import { WorldMap } from "./WorldMap";
 
-type Beat = "envelope" | "card" | "plane" | "map" | "venue";
+type Beat =
+  | "envelope"
+  | "card"
+  | "plane"
+  | "map"
+  | "venue"
+  | "rsvp"
+  | "thanks";
+
+const PENDING_KEY = "pending-rsvp";
 
 type Props = {
   invite: Invite;
@@ -21,6 +33,24 @@ export function Scene({ invite }: Props) {
   const [muted, setMuted] = useState(false);
   const [musicStarted, setMusicStarted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const retry = async () => {
+      try {
+        const raw = localStorage.getItem(PENDING_KEY);
+        if (!raw) return;
+        const payload = JSON.parse(raw);
+        const res = await fetch("/api/rsvp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) localStorage.removeItem(PENDING_KEY);
+      } catch {}
+    };
+    window.addEventListener("focus", retry);
+    return () => window.removeEventListener("focus", retry);
+  }, []);
 
   const startMusic = useCallback(() => {
     const audio = audioRef.current;
@@ -141,21 +171,29 @@ export function Scene({ invite }: Props) {
             </motion.div>
           )}
 
-          {beat === "venue" && (
+          {(beat === "venue" || beat === "rsvp" || beat === "thanks") && (
             <motion.div
               key="venue"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="w-full text-center"
+              className="w-full"
             >
-              <p className="text-xs uppercase tracking-[0.25em] opacity-50">
-                Venue card next…
-              </p>
+              <VenueCard visible onRsvpClick={() => setBeat("rsvp")} />
             </motion.div>
           )}
         </AnimatePresence>
       </section>
+
+      <RsvpForm
+        visible={beat === "rsvp"}
+        slug={invite.slug}
+        max={invite.max}
+        onSubmitted={() => setBeat("thanks")}
+      />
+
+      <ThankYou visible={beat === "thanks"} />
     </main>
   );
 }
