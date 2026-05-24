@@ -26,24 +26,11 @@ export const metadata: Metadata = {
     title: "Suzane & Amine · Aug 29, 2026",
     description: "We can't wait to celebrate with you in Nahr El Kalb, Lebanon.",
     type: "website",
-    images: [
-      {
-        url: "/og.png",
-        width: 1200,
-        height: 630,
-        alt: "Suzane & Amine — August 29, 2026",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Suzane & Amine · Aug 29, 2026",
     description: "We can't wait to celebrate with you in Nahr El Kalb, Lebanon.",
-    images: ["/og.png"],
-  },
-  icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    apple: "/apple-touch-icon.png",
   },
 };
 
@@ -62,6 +49,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} h-full antialiased`}>
+      <head>
+        <link rel="preconnect" href="https://www.google.com" />
+        <link rel="dns-prefetch" href="https://maps.google.com" />
+        <link rel="preload" as="audio" href="/perfect.mp3" />
+      </head>
       <body className="min-h-full">{children}</body>
     </html>
   );
