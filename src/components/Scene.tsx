@@ -106,11 +106,11 @@ export function Scene({ invite }: Props) {
         // TODO: ensure public/perfect.mp3 exists (Ed Sheeran). Music tap will silently fail otherwise.
       />
 
-      <header className="pointer-events-none fixed top-0 inset-x-0 z-20 flex items-start justify-between px-5 pt-5">
-        <div className="pointer-events-auto">
+      <header className="pointer-events-none fixed top-0 inset-x-0 z-20 pt-5">
+        <div className="pointer-events-auto mx-auto max-w-[min(92vw,520px)] px-4">
           <Countdown mode="corner" />
         </div>
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto absolute top-5 right-5">
           <MusicToggle visible={musicStarted} muted={muted} onToggle={toggleMute} />
         </div>
       </header>

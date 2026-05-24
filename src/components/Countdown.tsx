@@ -66,17 +66,17 @@ export function Countdown({ mode = "corner", className }: Props) {
   if (mode === "corner") {
     if (parts.past) {
       return (
-        <div className={className}>
-          <span className="font-display text-sm tracking-wide">Today is the day.</span>
+        <div className={`${className ?? ""} text-center`}>
+          <span className="font-display text-xl tracking-wide">Today is the day.</span>
         </div>
       );
     }
     return (
-      <div className={`${className ?? ""} leading-tight`}>
-        <div className="font-display text-[13px] text-ink-olive-deep">
+      <div className={`${className ?? ""} text-center leading-tight`}>
+        <div className="font-display text-lg sm:text-xl text-ink-olive-deep">
           {WEDDING_LABEL}
         </div>
-        <div className="mt-0.5 text-[11px] tabular-nums opacity-70">
+        <div className="mt-1 text-sm sm:text-base tabular-nums opacity-75">
           in {plural(parts.days, "day")}, {plural(parts.hours, "hour")},{" "}
           {plural(parts.minutes, "minute")}, {plural(parts.seconds, "second")}
         </div>
