@@ -16,7 +16,6 @@ import { WorldMap } from "./WorldMap";
 type Beat =
   | "envelope"
   | "card"
-  | "plane"
   | "map"
   | "venue"
   | "rsvp"
@@ -85,13 +84,7 @@ export function Scene({ invite }: Props) {
 
   useEffect(() => {
     if (beat !== "card") return;
-    const id = setTimeout(() => setBeat("plane"), 3200);
-    return () => clearTimeout(id);
-  }, [beat]);
-
-  useEffect(() => {
-    if (beat !== "plane") return;
-    const id = setTimeout(() => setBeat("map"), 1700);
+    const id = setTimeout(() => setBeat("map"), 7500);
     return () => clearTimeout(id);
   }, [beat]);
 
@@ -139,35 +132,62 @@ export function Scene({ invite }: Props) {
           {beat === "card" && (
             <motion.div
               key="card"
-              // Picks up where the rising card stub leaves off: slightly
-              // smaller-and-higher than its resting state, scaling and settling
-              // down into place so it reads as the same card.
-              initial={{ opacity: 0, scale: 1.15, y: -40 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                y: 0,
-                transition: { duration: 0.85, ease: [0.2, 0.7, 0.2, 1] },
-              }}
-              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.4 } }}
+              exit={{ opacity: 0, transition: { duration: 0.4 } }}
               className="absolute inset-0 grid place-items-center px-4"
+              style={{ perspective: 1400 }}
             >
-              <InvitationCard visible />
-            </motion.div>
-          )}
-
-          {beat === "plane" && (
-            <motion.div
-              key="plane"
-              className="w-full"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
+              {/* Card crumples: rise → hold → compress → twist → fold flat → fade.
+                  Gentle asymmetric scaleX/scaleY + soft alternating skew +
+                  counter-rotation read as paper being slowly folded. */}
               <motion.div
-                initial={{ x: 0, y: 0, rotate: 0, scale: 1 }}
-                animate={{ x: "60vw", y: "-50vh", rotate: -25, scale: 0.4 }}
-                transition={{ duration: 1.6, ease: [0.5, 0, 0.5, 1] }}
-                className="mx-auto w-40"
+                initial={{ opacity: 0, scale: 1.15, y: -40 }}
+                animate={{
+                  opacity: [0, 1, 1, 1, 1, 1, 0],
+                  scaleX: [1.15, 1, 1, 0.82, 0.55, 0.36, 0.32],
+                  scaleY: [1.15, 1, 1, 0.92, 1.08, 0.62, 0.52],
+                  y: [-40, 0, 0, -2, 5, 2, 2],
+                  rotate: [0, 0, 0, -4, 6, -3, -3],
+                  skewX: [0, 0, 0, 8, -13, 5, 4],
+                  skewY: [0, 0, 0, -2, 4, -1, -1],
+                  filter: [
+                    "brightness(1)",
+                    "brightness(1)",
+                    "brightness(1)",
+                    "brightness(0.97)",
+                    "brightness(0.94)",
+                    "brightness(0.96)",
+                    "brightness(1)",
+                  ],
+                }}
+                transition={{
+                  duration: 5.5,
+                  times: [0, 0.218, 0.545, 0.636, 0.727, 0.854, 1],
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                className="absolute origin-center"
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <InvitationCard visible />
+              </motion.div>
+
+              {/* Plane unfurls from the folded paper, settles to full size,
+                  then drifts off-screen. Lives on same timeline as the card
+                  beat (7.5s total). */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.32, x: 0, y: 0, rotate: -4 }}
+                animate={{
+                  opacity: [0, 0, 0, 1, 1, 1],
+                  scale: [0.32, 0.32, 0.5, 1, 1, 0.4],
+                  x: [0, 0, 0, 0, 0, "60vw"],
+                  y: [0, 0, 0, 0, 0, "-50vh"],
+                  rotate: [-4, -4, -6, 0, 0, -25],
+                }}
+                transition={{
+                  duration: 7.5,
+                  times: [0, 0.6, 0.64, 0.707, 0.76, 1],
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                className="absolute w-40"
               >
                 <PaperPlane className="w-full h-auto" />
               </motion.div>
