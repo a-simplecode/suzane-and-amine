@@ -74,7 +74,7 @@ export function Scene({ invite }: Props) {
 
   useEffect(() => {
     if (beat !== "card" || !opened) return;
-    const id = setTimeout(() => setBeat("map"), 5500);
+    const id = setTimeout(() => setBeat("map"), 7000);
     return () => clearTimeout(id);
   }, [beat, opened]);
 
@@ -109,42 +109,44 @@ export function Scene({ invite }: Props) {
               exit={{ opacity: 0, transition: { duration: 0.4 } }}
               className="absolute inset-0 grid place-items-center px-4"
             >
-              {/* Envelope — always visible at start of the beat. Fades itself
-                  out via its own internal animation once the seal is tapped. */}
+              {/* The invitation — rendered BEHIND the envelope so the envelope
+                  front face masks the lower portion of the card while it's
+                  still small. The card stays at scale 0.4 (just slightly
+                  taller than the envelope's interior) until the envelope is
+                  fully faded, so its bottom never visibly sticks out below
+                  the envelope. Once the envelope is gone, the card grows to
+                  full size, holds, shrinks to the plane footprint. */}
+              {opened && (
+                <div className="absolute inset-0 grid place-items-center pointer-events-none">
+                  <motion.div
+                    initial={{ opacity: 0, scaleX: 0.4, scaleY: 0.4 }}
+                    animate={{
+                      opacity: [0, 1, 1, 1, 1, 0, 0],
+                      scaleX: [0.4, 0.4, 0.4, 1, 1, 0.47, 0.47],
+                      scaleY: [0.4, 0.4, 0.4, 1, 1, 0.353, 0.353],
+                    }}
+                    transition={{
+                      // wall-clock from seal-tap:
+                      // 0, 0.95s, 2.4s, 3.8s, 5.0s, 5.6s, 7.0s
+                      duration: 7,
+                      times: [0, 0.136, 0.343, 0.543, 0.714, 0.8, 1],
+                      ease: [0.4, 0, 0.2, 1],
+                    }}
+                  >
+                    <InvitationCard visible />
+                  </motion.div>
+                </div>
+              )}
+
+              {/* Envelope — sits on top of the card so its front face occludes
+                  the still-inside portion of the card while it emerges. Fades
+                  itself out via its own internal animation. */}
               <div className="absolute inset-0 grid place-items-center [overflow:visible]">
                 <Envelope label={invite.label} opened={opened} onTapSeal={openEnvelope} />
               </div>
 
-              {/* Everything from here on only mounts when the seal is tapped.
-                  Once mounted, every element runs on the same 5.5s timeline
-                  from the moment `opened` flipped true, so the card emerging
-                  from the envelope is the same element that holds, shrinks,
-                  folds, and flies off. */}
               {opened && (
                 <>
-                  {/* The invitation — emerges from the envelope mouth, holds
-                      readable, then shrinks to the 160x160 plane footprint as
-                      the paper shell takes over. */}
-                  <div className="absolute inset-0 grid place-items-center pointer-events-none">
-                    <motion.div
-                      initial={{ opacity: 0, scaleX: 0.4, scaleY: 0.4, y: 40 }}
-                      animate={{
-                        opacity: [0, 0, 1, 1, 0, 0],
-                        scaleX: [0.4, 0.4, 1, 1, 0.47, 0.47],
-                        scaleY: [0.4, 0.4, 1, 1, 0.353, 0.353],
-                        y: [40, 40, 0, 0, 0, 0],
-                      }}
-                      transition={{
-                        // wall-clock from seal-tap: 0, 0.95s, 2.3s, 3.5s, 3.9s, 5.5s
-                        duration: 5.5,
-                        times: [0, 0.173, 0.418, 0.636, 0.71, 1],
-                        ease: [0.4, 0, 0.2, 1],
-                      }}
-                    >
-                      <InvitationCard visible />
-                    </motion.div>
-                  </div>
-
                   {/* Paper shell — fixed 160x160 box. Fades in as the card
                       finishes shrinking (its scaled-down size lands on the
                       shell's footprint), then clip-path morphs rect → plane
@@ -168,9 +170,9 @@ export function Scene({ invite }: Props) {
                         ],
                       }}
                       transition={{
-                        // wall-clock: 0, 3.5s, 3.9s, 4.1s, 4.5s, 4.7s, 5.5s
-                        duration: 5.5,
-                        times: [0, 0.636, 0.71, 0.745, 0.818, 0.855, 1],
+                        // wall-clock: 0, 5.0s, 5.6s, 5.8s, 6.0s, 6.4s, 7.0s
+                        duration: 7,
+                        times: [0, 0.714, 0.8, 0.829, 0.857, 0.914, 1],
                         ease: [0.4, 0, 0.2, 1],
                       }}
                       className="w-40 h-40 bg-bg-beige-warm shadow-[0_18px_40px_rgba(47,58,34,0.18)]"
@@ -183,16 +185,16 @@ export function Scene({ invite }: Props) {
                     <motion.div
                       initial={{ opacity: 0, scale: 1, x: 0, y: 0, rotate: 0 }}
                       animate={{
-                        opacity: [0, 0, 1, 1, 1],
-                        scale: [1, 1, 1, 1, 0.4],
-                        x: [0, 0, 0, 0, "60vw"],
-                        y: [0, 0, 0, 0, "-50vh"],
-                        rotate: [0, 0, 0, 0, -40],
+                        opacity: [0, 0, 1, 1],
+                        scale: [1, 1, 1, 0.4],
+                        x: [0, 0, 0, "60vw"],
+                        y: [0, 0, 0, "-50vh"],
+                        rotate: [0, 0, 0, -40],
                       }}
                       transition={{
-                        // wall-clock: 0, 4.5s, 4.7s, 4.9s, 5.5s
-                        duration: 5.5,
-                        times: [0, 0.818, 0.855, 0.891, 1],
+                        // wall-clock: 0, 6.0s, 6.4s, 7.0s
+                        duration: 7,
+                        times: [0, 0.857, 0.914, 1],
                         ease: [0.4, 0, 0.2, 1],
                       }}
                       className="w-40 h-40"
