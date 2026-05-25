@@ -180,7 +180,7 @@ export function Scene({ invite }: Props) {
                   scale: [0.32, 0.32, 0.5, 1, 1, 0.4],
                   x: [0, 0, 0, 0, 0, "60vw"],
                   y: [0, 0, 0, 0, 0, "-50vh"],
-                  rotate: [-4, -4, -6, 0, 0, -25],
+                  rotate: [-4, -4, -6, 0, 0, -40],
                 }}
                 transition={{
                   duration: 7.5,
