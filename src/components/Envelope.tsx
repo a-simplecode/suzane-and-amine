@@ -9,12 +9,9 @@ type Props = {
 };
 
 // Animation timing constants (seconds, relative to the moment the seal is tapped).
-// Scene.tsx swaps to the card beat at envelope-open + ENVELOPE_TOTAL_MS.
 const T_FLAP_OPEN = 0.35; // flap starts unhinging after the seal cracks
 const T_CARD_EMERGE = 0.95; // card starts climbing once the flap is mostly open
 const T_ENVELOPE_FADE = 1.7; // envelope fades / tips after the card is mostly out
-
-export const ENVELOPE_TOTAL_MS = 2400;
 
 export function Envelope({ label, opened, onTapSeal }: Props) {
   const reduced = useReducedMotion();
@@ -56,20 +53,9 @@ export function Envelope({ label, opened, onTapSeal }: Props) {
         >
           <svg
             viewBox="0 0 500 300"
-            // overflow:visible lets the emerging card extend above the
-            // envelope bounds without being clipped by the SVG viewport.
-            overflow="visible"
-            style={{ overflow: "visible" }}
             className="w-full h-full drop-shadow-[0_8px_24px_rgba(47,58,34,0.18)]"
             aria-hidden="true"
           >
-            <defs>
-              <linearGradient id="card-stub-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--bg-beige-warm)" />
-                <stop offset="100%" stopColor="var(--bg-beige)" />
-              </linearGradient>
-            </defs>
-
             {/* Subtle "inside" of the envelope, only seen briefly when the
                 flap is past 90° — gives the open mouth a touch of depth. */}
             <motion.path
@@ -83,38 +69,7 @@ export function Envelope({ label, opened, onTapSeal }: Props) {
               }}
             />
 
-            {/* CARD STUB lives BEFORE the front rect so the rect naturally
-                masks it while it's inside. As the stub translates upward, the
-                portion that crosses above the rect's top edge (y=40) becomes
-                visible — the card visually emerges from the envelope mouth. */}
-            <motion.g
-              style={{ transformBox: "fill-box", transformOrigin: "center" }}
-              initial={{ y: 0, scale: 1, rotate: 0, opacity: 1 }}
-              animate={
-                opened
-                  ? reduced
-                    ? { y: 0, scale: 1, rotate: 0, opacity: 0 }
-                    : {
-                        y: [0, -90, -200, -330],
-                        scale: [1, 1.04, 1.16, 1.45],
-                        rotate: [0, -1.5, 1.2, -0.5],
-                        opacity: [1, 1, 1, 0],
-                      }
-                  : { y: 0, scale: 1, rotate: 0, opacity: 1 }
-              }
-              transition={{
-                duration: reduced ? 0 : 1.35,
-                delay: opened ? T_CARD_EMERGE : 0,
-                times: opened ? [0, 0.3, 0.7, 1] : undefined,
-                ease: [0.34, 0.05, 0.5, 1],
-              }}
-            >
-              <CardStub />
-            </motion.g>
-
-            {/* Front face of the envelope — drawn AFTER the card stub so it
-                covers everything from y=40 down, masking the stub while it
-                is still inside. */}
+            {/* Front face of the envelope. */}
             <rect
               x="10"
               y="40"
@@ -308,84 +263,3 @@ const WAX_SHARDS = [
   { x: 48, y: -10, rot: 110 },
 ] as const;
 
-// Mini "card" rendered inside the envelope. Designed to read as the same
-// invitation that takes over in the next beat — same palette, same "Suzane &
-// Amine" / "are getting married" hierarchy — so the handoff feels continuous.
-function CardStub() {
-  return (
-    <g>
-      {/* Card paper. */}
-      <rect
-        x="80"
-        y="55"
-        width="340"
-        height="220"
-        rx="6"
-        fill="url(#card-stub-fill)"
-        stroke="var(--accent-olive)"
-        strokeWidth="1"
-      />
-      {/* Soft shadow under the top edge so the card reads as a real piece of
-          paper poking out of the envelope mouth. */}
-      <rect
-        x="80"
-        y="55"
-        width="340"
-        height="6"
-        rx="3"
-        fill="var(--ink-olive-deep)"
-        opacity="0.08"
-      />
-      <text
-        x="250"
-        y="115"
-        textAnchor="middle"
-        fontFamily="var(--font-display), Georgia, serif"
-        fontSize="30"
-        fill="var(--ink-olive-deep)"
-        letterSpacing="1"
-      >
-        Suzane <tspan opacity="0.55">&amp;</tspan> Amine
-      </text>
-      <text
-        x="250"
-        y="142"
-        textAnchor="middle"
-        fontSize="9"
-        fill="var(--accent-olive)"
-        letterSpacing="3.5"
-      >
-        ARE GETTING MARRIED
-      </text>
-      <line
-        x1="210"
-        y1="160"
-        x2="290"
-        y2="160"
-        stroke="var(--accent-olive)"
-        strokeOpacity="0.4"
-        strokeWidth="1"
-      />
-      <text
-        x="250"
-        y="195"
-        textAnchor="middle"
-        fontFamily="var(--font-display), Georgia, serif"
-        fontSize="16"
-        fill="var(--ink-olive-deep)"
-      >
-        August 29, 2026
-      </text>
-      <text
-        x="250"
-        y="222"
-        textAnchor="middle"
-        fontSize="8"
-        fill="var(--accent-olive)"
-        letterSpacing="3"
-      >
-        NAHR EL KALB · LEBANON
-      </text>
-    </g>
-  );
-}

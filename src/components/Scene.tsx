@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Invite } from "@/lib/invites";
 import { Countdown } from "./Countdown";
-import { Envelope, ENVELOPE_TOTAL_MS } from "./Envelope";
+import { Envelope } from "./Envelope";
 import { InvitationCard } from "./InvitationCard";
 import { MusicToggle } from "./MusicToggle";
 import { PaperPlane } from "./PaperPlane";
@@ -13,13 +13,7 @@ import { ThankYou } from "./ThankYou";
 import { VenueCard } from "./VenueCard";
 import { WorldMap } from "./WorldMap";
 
-type Beat =
-  | "envelope"
-  | "card"
-  | "map"
-  | "venue"
-  | "rsvp"
-  | "thanks";
+type Beat = "card" | "map" | "venue" | "rsvp" | "thanks";
 
 const PENDING_KEY = "pending-rsvp";
 
@@ -28,7 +22,7 @@ type Props = {
 };
 
 export function Scene({ invite }: Props) {
-  const [beat, setBeat] = useState<Beat>("envelope");
+  const [beat, setBeat] = useState<Beat>("card");
   const [opened, setOpened] = useState(false);
   const [muted, setMuted] = useState(false);
   const [musicStarted, setMusicStarted] = useState(false);
@@ -73,20 +67,16 @@ export function Scene({ invite }: Props) {
   }, []);
 
   const openEnvelope = useCallback(() => {
-    if (beat !== "envelope" || opened) return;
+    if (opened) return;
     setOpened(true);
     startMusic();
-    // Wait for the full envelope-open + card-emerge animation to play out
-    // before swapping to the card beat, so the rising card stub hands off to
-    // the real InvitationCard without a visible jump.
-    setTimeout(() => setBeat("card"), ENVELOPE_TOTAL_MS);
-  }, [beat, opened, startMusic]);
+  }, [opened, startMusic]);
 
   useEffect(() => {
-    if (beat !== "card") return;
+    if (beat !== "card" || !opened) return;
     const id = setTimeout(() => setBeat("map"), 5500);
     return () => clearTimeout(id);
-  }, [beat]);
+  }, [beat, opened]);
 
   const handleArrived = useCallback(() => {
     setBeat((b) => (b === "map" ? "venue" : b));
@@ -113,105 +103,105 @@ export function Scene({ invite }: Props) {
 
       <section className="relative min-h-dvh w-full grid place-items-center px-4">
         <AnimatePresence mode="sync">
-          {beat === "envelope" && (
-            <motion.div
-              key="envelope"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              // Envelope handles its own fade/tip in the open animation, so
-              // the AnimatePresence exit just snaps it away once the card beat
-              // has taken over.
-              exit={{ opacity: 0, transition: { duration: 0.2 } }}
-              transition={{ duration: 0.6 }}
-              className="absolute inset-0 grid place-items-center px-4 [overflow:visible]"
-            >
-              <Envelope label={invite.label} opened={opened} onTapSeal={openEnvelope} />
-            </motion.div>
-          )}
-
           {beat === "card" && (
             <motion.div
               key="card"
               exit={{ opacity: 0, transition: { duration: 0.4 } }}
               className="absolute inset-0 grid place-items-center px-4"
             >
-              {/* Card content — visible while readable, then shrinks to the
-                  shared 160x160 footprint of the shell/plane and fades out so
-                  the handoff to the morphing paper happens at the same size. */}
-              <div className="absolute inset-0 grid place-items-center pointer-events-none">
-                <motion.div
-                  initial={{ opacity: 0, scale: 1.15, y: -40 }}
-                  animate={{
-                    opacity: [0, 1, 1, 0, 0],
-                    scaleX: [1.15, 1, 1, 0.47, 0.47],
-                    scaleY: [1.15, 1, 1, 0.353, 0.353],
-                    y: [-40, 0, 0, 0, 0],
-                  }}
-                  transition={{
-                    duration: 5.5,
-                    times: [0, 0.218, 0.5, 0.618, 1],
-                    ease: [0.4, 0, 0.2, 1],
-                  }}
-                >
-                  <InvitationCard visible />
-                </motion.div>
+              {/* Envelope — always visible at start of the beat. Fades itself
+                  out via its own internal animation once the seal is tapped. */}
+              <div className="absolute inset-0 grid place-items-center [overflow:visible]">
+                <Envelope label={invite.label} opened={opened} onTapSeal={openEnvelope} />
               </div>
 
-              {/* Paper shell — fixed 160x160 box, identical to the plane SVG.
-                  clip-path morphs from a full rectangle into the PaperPlane
-                  silhouette (rear-top, tip, inner-fold, rear-bottom). One
-                  continuous piece of paper folding itself into a plane. */}
-              <div className="absolute inset-0 grid place-items-center pointer-events-none">
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                    clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                  }}
-                  animate={{
-                    opacity: [0, 0, 1, 1, 1, 0, 0],
-                    clipPath: [
-                      "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                      "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                      "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                      "polygon(45% 25%, 55% 7%, 70% 75%, 5% 92%)",
-                      "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
-                      "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
-                      "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
-                    ],
-                    rotate: [0, 0, 0, -2, 0, 0, 0],
-                  }}
-                  transition={{
-                    duration: 5.5,
-                    times: [0, 0.218, 0.5, 0.618, 0.78, 0.818, 1],
-                    ease: [0.4, 0, 0.2, 1],
-                  }}
-                  className="w-40 h-40 bg-bg-beige-warm shadow-[0_18px_40px_rgba(47,58,34,0.18)]"
-                />
-              </div>
+              {/* Everything from here on only mounts when the seal is tapped.
+                  Once mounted, every element runs on the same 5.5s timeline
+                  from the moment `opened` flipped true, so the card emerging
+                  from the envelope is the same element that holds, shrinks,
+                  folds, and flies off. */}
+              {opened && (
+                <>
+                  {/* The invitation — emerges from the envelope mouth, holds
+                      readable, then shrinks to the 160x160 plane footprint as
+                      the paper shell takes over. */}
+                  <div className="absolute inset-0 grid place-items-center pointer-events-none">
+                    <motion.div
+                      initial={{ opacity: 0, scaleX: 0.4, scaleY: 0.4, y: 40 }}
+                      animate={{
+                        opacity: [0, 0, 1, 1, 0, 0],
+                        scaleX: [0.4, 0.4, 1, 1, 0.47, 0.47],
+                        scaleY: [0.4, 0.4, 1, 1, 0.353, 0.353],
+                        y: [40, 40, 0, 0, 0, 0],
+                      }}
+                      transition={{
+                        // wall-clock from seal-tap: 0, 0.95s, 2.3s, 3.5s, 3.9s, 5.5s
+                        duration: 5.5,
+                        times: [0, 0.173, 0.418, 0.636, 0.71, 1],
+                        ease: [0.4, 0, 0.2, 1],
+                      }}
+                    >
+                      <InvitationCard visible />
+                    </motion.div>
+                  </div>
 
-              {/* PaperPlane SVG — crossfades in over the folded silhouette to
-                  add the wing-fold shading detail, then flies off-screen.
-                  Same 160x160 box as the shell so they align pixel-for-pixel. */}
-              <div className="absolute inset-0 grid place-items-center pointer-events-none">
-                <motion.div
-                  initial={{ opacity: 0, scale: 1, x: 0, y: 0, rotate: 0 }}
-                  animate={{
-                    opacity: [0, 0, 0, 1, 1],
-                    scale: [1, 1, 1, 1, 0.4],
-                    x: [0, 0, 0, 0, "60vw"],
-                    y: [0, 0, 0, 0, "-50vh"],
-                    rotate: [0, 0, 0, 0, -40],
-                  }}
-                  transition={{
-                    duration: 5.5,
-                    times: [0, 0.745, 0.78, 0.818, 1],
-                    ease: [0.4, 0, 0.2, 1],
-                  }}
-                  className="w-40 h-40"
-                >
-                  <PaperPlane className="w-full h-full" />
-                </motion.div>
-              </div>
+                  {/* Paper shell — fixed 160x160 box. Fades in as the card
+                      finishes shrinking (its scaled-down size lands on the
+                      shell's footprint), then clip-path morphs rect → plane
+                      silhouette. */}
+                  <div className="absolute inset-0 grid place-items-center pointer-events-none">
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                        clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                      }}
+                      animate={{
+                        opacity: [0, 0, 1, 1, 1, 0, 0],
+                        clipPath: [
+                          "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                          "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                          "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                          "polygon(45% 25%, 55% 7%, 70% 75%, 5% 92%)",
+                          "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
+                          "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
+                          "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
+                        ],
+                      }}
+                      transition={{
+                        // wall-clock: 0, 3.5s, 3.9s, 4.1s, 4.5s, 4.7s, 5.5s
+                        duration: 5.5,
+                        times: [0, 0.636, 0.71, 0.745, 0.818, 0.855, 1],
+                        ease: [0.4, 0, 0.2, 1],
+                      }}
+                      className="w-40 h-40 bg-bg-beige-warm shadow-[0_18px_40px_rgba(47,58,34,0.18)]"
+                    />
+                  </div>
+
+                  {/* PaperPlane SVG — crossfades in over the folded silhouette
+                      then flies off. Same 160x160 box as the shell. */}
+                  <div className="absolute inset-0 grid place-items-center pointer-events-none">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 1, x: 0, y: 0, rotate: 0 }}
+                      animate={{
+                        opacity: [0, 0, 1, 1, 1],
+                        scale: [1, 1, 1, 1, 0.4],
+                        x: [0, 0, 0, 0, "60vw"],
+                        y: [0, 0, 0, 0, "-50vh"],
+                        rotate: [0, 0, 0, 0, -40],
+                      }}
+                      transition={{
+                        // wall-clock: 0, 4.5s, 4.7s, 4.9s, 5.5s
+                        duration: 5.5,
+                        times: [0, 0.818, 0.855, 0.891, 1],
+                        ease: [0.4, 0, 0.2, 1],
+                      }}
+                      className="w-40 h-40"
+                    >
+                      <PaperPlane className="w-full h-full" />
+                    </motion.div>
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
 
