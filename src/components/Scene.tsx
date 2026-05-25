@@ -157,8 +157,8 @@ export function Scene({ invite }: Props) {
                     "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
                     "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
                   ],
-                  scale: [1, 1, 1, 0.9, 0.62, 0.55, 0.5],
-                  scaleY: [1, 1, 1, 0.95, 0.7, 0.6, 0.55],
+                  scale: [1, 1, 1, 0.88, 0.6, 0.52, 0.47],
+                  scaleY: [1, 1, 1, 0.88, 0.5, 0.4, 0.35],
                   rotate: [0, 0, 0, -2, 0, 0, 0],
                 }}
                 transition={{
@@ -191,13 +191,13 @@ export function Scene({ invite }: Props) {
               {/* PaperPlane SVG — crossfades in over the folded silhouette to
                   add the wing-fold shading detail, then flies off-screen. */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.5, x: 0, y: 0, rotate: 0 }}
+                initial={{ opacity: 0, scale: 1, x: 0, y: 0, rotate: 0 }}
                 animate={{
                   opacity: [0, 0, 0, 1, 1, 1],
-                  scale: [0.5, 0.5, 0.65, 0.85, 0.85, 0.4],
+                  scale: [1, 1, 1, 1, 1, 0.4],
                   x: [0, 0, 0, 0, 0, "60vw"],
                   y: [0, 0, 0, 0, 0, "-50vh"],
-                  rotate: [0, 0, -2, 0, 0, -40],
+                  rotate: [0, 0, 0, 0, 0, -40],
                 }}
                 transition={{
                   duration: 7.5,
