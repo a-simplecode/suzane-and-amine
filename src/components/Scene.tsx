@@ -135,12 +135,32 @@ export function Scene({ invite }: Props) {
               exit={{ opacity: 0, transition: { duration: 0.4 } }}
               className="absolute inset-0 grid place-items-center px-4"
             >
-              {/* Paper shell — same paper color and dimensions as the
-                  InvitationCard. Sits behind the card content. As the card
-                  text fades, the shell's clip-path morphs from a full rect
-                  into the PaperPlane silhouette (corners interpolate to
-                  rear-top, tip, inner-fold, rear-bottom). One continuous
-                  piece of paper folding itself into a plane. */}
+              {/* Card content — visible while readable, then shrinks to the
+                  shared 160x160 footprint of the shell/plane and fades out so
+                  the handoff to the morphing paper happens at the same size. */}
+              <div className="absolute inset-0 grid place-items-center pointer-events-none">
+                <motion.div
+                  initial={{ opacity: 0, scale: 1.15, y: -40 }}
+                  animate={{
+                    opacity: [0, 1, 1, 0, 0],
+                    scaleX: [1.15, 1, 1, 0.47, 0.47],
+                    scaleY: [1.15, 1, 1, 0.353, 0.353],
+                    y: [-40, 0, 0, 0, 0],
+                  }}
+                  transition={{
+                    duration: 5.5,
+                    times: [0, 0.218, 0.5, 0.618, 1],
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                >
+                  <InvitationCard visible />
+                </motion.div>
+              </div>
+
+              {/* Paper shell — fixed 160x160 box, identical to the plane SVG.
+                  clip-path morphs from a full rectangle into the PaperPlane
+                  silhouette (rear-top, tip, inner-fold, rear-bottom). One
+                  continuous piece of paper folding itself into a plane. */}
               <div className="absolute inset-0 grid place-items-center pointer-events-none">
                 <motion.div
                   initial={{
@@ -158,8 +178,6 @@ export function Scene({ invite }: Props) {
                       "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
                       "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
                     ],
-                    scaleX: [1, 1, 1, 0.88, 0.6, 0.52, 0.47],
-                    scaleY: [1, 1, 1, 0.88, 0.5, 0.4, 0.353],
                     rotate: [0, 0, 0, -2, 0, 0, 0],
                   }}
                   transition={{
@@ -167,32 +185,13 @@ export function Scene({ invite }: Props) {
                     times: [0, 0.218, 0.5, 0.618, 0.78, 0.87, 1],
                     ease: [0.4, 0, 0.2, 1],
                   }}
-                  className="w-[min(82vw,340px)] aspect-[3/4] bg-bg-beige-warm shadow-[0_18px_40px_rgba(47,58,34,0.18)]"
+                  className="w-40 h-40 bg-bg-beige-warm shadow-[0_18px_40px_rgba(47,58,34,0.18)]"
                 />
               </div>
 
-              {/* Card content sits on top of the shell while readable, then
-                  fades out as the fold begins so the shell can morph cleanly. */}
-              <div className="absolute inset-0 grid place-items-center pointer-events-none">
-                <motion.div
-                  initial={{ opacity: 0, scale: 1.15, y: -40 }}
-                  animate={{
-                    opacity: [0, 1, 1, 0, 0],
-                    scale: [1.15, 1, 1, 1, 1],
-                    y: [-40, 0, 0, 0, 0],
-                  }}
-                  transition={{
-                    duration: 5.5,
-                    times: [0, 0.218, 0.5, 0.618, 1],
-                    ease: [0.4, 0, 0.2, 1],
-                  }}
-                >
-                  <InvitationCard visible />
-                </motion.div>
-              </div>
-
               {/* PaperPlane SVG — crossfades in over the folded silhouette to
-                  add the wing-fold shading detail, then flies off-screen. */}
+                  add the wing-fold shading detail, then flies off-screen.
+                  Same 160x160 box as the shell so they align pixel-for-pixel. */}
               <div className="absolute inset-0 grid place-items-center pointer-events-none">
                 <motion.div
                   initial={{ opacity: 0, scale: 1, x: 0, y: 0, rotate: 0 }}
@@ -208,9 +207,9 @@ export function Scene({ invite }: Props) {
                     times: [0, 0.572, 0.62, 0.667, 0.76, 1],
                     ease: [0.4, 0, 0.2, 1],
                   }}
-                  className="w-40"
+                  className="w-40 h-40"
                 >
-                  <PaperPlane className="w-full h-auto" />
+                  <PaperPlane className="w-full h-full" />
                 </motion.div>
               </div>
             </motion.div>
