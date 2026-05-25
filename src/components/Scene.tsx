@@ -134,57 +134,74 @@ export function Scene({ invite }: Props) {
               key="card"
               exit={{ opacity: 0, transition: { duration: 0.4 } }}
               className="absolute inset-0 grid place-items-center px-4"
-              style={{ perspective: 1400 }}
             >
-              {/* Card crumples: rise → hold → compress → twist → fold flat → fade.
-                  Gentle asymmetric scaleX/scaleY + soft alternating skew +
-                  counter-rotation read as paper being slowly folded. */}
+              {/* Paper shell — same paper color and dimensions as the
+                  InvitationCard. Sits behind the card content. As the card
+                  text fades, the shell's clip-path morphs from a full rect
+                  into the PaperPlane silhouette (corners interpolate to
+                  rear-top, tip, inner-fold, rear-bottom). One continuous
+                  piece of paper folding itself into a plane. */}
               <motion.div
-                initial={{ opacity: 0, scale: 1.15, y: -40 }}
+                initial={{
+                  opacity: 0,
+                  clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                }}
                 animate={{
-                  opacity: [0, 1, 1, 1, 1, 1, 0],
-                  scaleX: [1.15, 1, 1, 0.82, 0.55, 0.36, 0.32],
-                  scaleY: [1.15, 1, 1, 0.92, 1.08, 0.62, 0.52],
-                  y: [-40, 0, 0, -2, 5, 2, 2],
-                  rotate: [0, 0, 0, -4, 6, -3, -3],
-                  skewX: [0, 0, 0, 8, -13, 5, 4],
-                  skewY: [0, 0, 0, -2, 4, -1, -1],
-                  filter: [
-                    "brightness(1)",
-                    "brightness(1)",
-                    "brightness(1)",
-                    "brightness(0.97)",
-                    "brightness(0.94)",
-                    "brightness(0.96)",
-                    "brightness(1)",
+                  opacity: [0, 0, 1, 1, 1, 1, 0],
+                  clipPath: [
+                    "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                    "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                    "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                    "polygon(4% 6%, 96% 28%, 72% 72%, 4% 92%)",
+                    "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
+                    "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
+                    "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
                   ],
+                  scale: [1, 1, 1, 0.9, 0.62, 0.55, 0.5],
+                  scaleY: [1, 1, 1, 0.95, 0.7, 0.6, 0.55],
+                  rotate: [0, 0, 0, -2, 0, 0, 0],
                 }}
                 transition={{
                   duration: 5.5,
-                  times: [0, 0.218, 0.545, 0.636, 0.727, 0.854, 1],
+                  times: [0, 0.218, 0.5, 0.618, 0.78, 0.87, 1],
                   ease: [0.4, 0, 0.2, 1],
                 }}
-                className="absolute origin-center"
-                style={{ transformStyle: "preserve-3d" }}
+                className="absolute w-[min(82vw,340px)] aspect-[3/4] bg-bg-beige-warm shadow-[0_18px_40px_rgba(47,58,34,0.18)]"
+              />
+
+              {/* Card content sits on top of the shell while readable, then
+                  fades out as the fold begins so the shell can morph cleanly. */}
+              <motion.div
+                initial={{ opacity: 0, scale: 1.15, y: -40 }}
+                animate={{
+                  opacity: [0, 1, 1, 0, 0],
+                  scale: [1.15, 1, 1, 1, 1],
+                  y: [-40, 0, 0, 0, 0],
+                }}
+                transition={{
+                  duration: 5.5,
+                  times: [0, 0.218, 0.5, 0.618, 1],
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                className="absolute"
               >
                 <InvitationCard visible />
               </motion.div>
 
-              {/* Plane unfurls from the folded paper, settles to full size,
-                  then drifts off-screen. Lives on same timeline as the card
-                  beat (7.5s total). */}
+              {/* PaperPlane SVG — crossfades in over the folded silhouette to
+                  add the wing-fold shading detail, then flies off-screen. */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.32, x: 0, y: 0, rotate: -4 }}
+                initial={{ opacity: 0, scale: 0.5, x: 0, y: 0, rotate: 0 }}
                 animate={{
                   opacity: [0, 0, 0, 1, 1, 1],
-                  scale: [0.32, 0.32, 0.5, 1, 1, 0.4],
+                  scale: [0.5, 0.5, 0.65, 0.85, 0.85, 0.4],
                   x: [0, 0, 0, 0, 0, "60vw"],
                   y: [0, 0, 0, 0, 0, "-50vh"],
-                  rotate: [-4, -4, -6, 0, 0, -40],
+                  rotate: [0, 0, -2, 0, 0, -40],
                 }}
                 transition={{
                   duration: 7.5,
-                  times: [0, 0.6, 0.64, 0.707, 0.76, 1],
+                  times: [0, 0.572, 0.62, 0.667, 0.76, 1],
                   ease: [0.4, 0, 0.2, 1],
                 }}
                 className="absolute w-40"
