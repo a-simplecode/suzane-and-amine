@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Invite } from "@/lib/invites";
 import { Countdown } from "./Countdown";
-import { Envelope } from "./Envelope";
+import { Envelope, ENVELOPE_TOTAL_MS } from "./Envelope";
 import { InvitationCard } from "./InvitationCard";
 import { MusicToggle } from "./MusicToggle";
 import { PaperPlane } from "./PaperPlane";
@@ -77,7 +77,10 @@ export function Scene({ invite }: Props) {
     if (beat !== "envelope" || opened) return;
     setOpened(true);
     startMusic();
-    setTimeout(() => setBeat("card"), 1500);
+    // Wait for the full envelope-open + card-emerge animation to play out
+    // before swapping to the card beat, so the rising card stub hands off to
+    // the real InvitationCard without a visible jump.
+    setTimeout(() => setBeat("card"), ENVELOPE_TOTAL_MS);
   }, [beat, opened, startMusic]);
 
   useEffect(() => {
@@ -122,14 +125,12 @@ export function Scene({ invite }: Props) {
               key="envelope"
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{
-                opacity: 0,
-                y: 80,
-                scale: 0.82,
-                transition: { duration: 0.7, ease: [0.4, 0, 0.7, 1] },
-              }}
+              // Envelope handles its own fade/tip in the open animation, so
+              // the AnimatePresence exit just snaps it away once the card beat
+              // has taken over.
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
               transition={{ duration: 0.6 }}
-              className="absolute inset-0 grid place-items-center px-4"
+              className="absolute inset-0 grid place-items-center px-4 [overflow:visible]"
             >
               <Envelope label={invite.label} opened={opened} onTapSeal={openEnvelope} />
             </motion.div>
@@ -138,11 +139,15 @@ export function Scene({ invite }: Props) {
           {beat === "card" && (
             <motion.div
               key="card"
-              initial={{ opacity: 0, scale: 0.45 }}
+              // Picks up where the rising card stub leaves off: slightly
+              // smaller-and-higher than its resting state, scaling and settling
+              // down into place so it reads as the same card.
+              initial={{ opacity: 0, scale: 1.15, y: -40 }}
               animate={{
                 opacity: 1,
                 scale: 1,
-                transition: { duration: 1.0, ease: [0.2, 0.7, 0.2, 1] },
+                y: 0,
+                transition: { duration: 0.85, ease: [0.2, 0.7, 0.2, 1] },
               }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.4 } }}
               className="absolute inset-0 grid place-items-center px-4"
