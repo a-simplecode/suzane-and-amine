@@ -84,7 +84,7 @@ export function Scene({ invite }: Props) {
 
   useEffect(() => {
     if (beat !== "card") return;
-    const id = setTimeout(() => setBeat("map"), 7500);
+    const id = setTimeout(() => setBeat("map"), 5500);
     return () => clearTimeout(id);
   }, [beat]);
 
@@ -168,21 +168,21 @@ export function Scene({ invite }: Props) {
                     clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
                   }}
                   animate={{
-                    opacity: [0, 0, 1, 1, 1, 1, 0],
+                    opacity: [0, 0, 1, 1, 1, 0, 0],
                     clipPath: [
                       "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
                       "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
                       "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                      "polygon(4% 6%, 96% 28%, 72% 72%, 4% 92%)",
-                      "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
-                      "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
-                      "polygon(10% 15%, 90% 50%, 40% 50%, 10% 85%)",
+                      "polygon(45% 25%, 55% 7%, 70% 75%, 5% 92%)",
+                      "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
+                      "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
+                      "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
                     ],
                     rotate: [0, 0, 0, -2, 0, 0, 0],
                   }}
                   transition={{
                     duration: 5.5,
-                    times: [0, 0.218, 0.5, 0.618, 0.78, 0.87, 1],
+                    times: [0, 0.218, 0.5, 0.618, 0.78, 0.818, 1],
                     ease: [0.4, 0, 0.2, 1],
                   }}
                   className="w-40 h-40 bg-bg-beige-warm shadow-[0_18px_40px_rgba(47,58,34,0.18)]"
@@ -196,15 +196,15 @@ export function Scene({ invite }: Props) {
                 <motion.div
                   initial={{ opacity: 0, scale: 1, x: 0, y: 0, rotate: 0 }}
                   animate={{
-                    opacity: [0, 0, 0, 1, 1, 1],
-                    scale: [1, 1, 1, 1, 1, 0.4],
-                    x: [0, 0, 0, 0, 0, "60vw"],
-                    y: [0, 0, 0, 0, 0, "-50vh"],
-                    rotate: [0, 0, 0, 0, 0, -40],
+                    opacity: [0, 0, 0, 1, 1],
+                    scale: [1, 1, 1, 1, 0.4],
+                    x: [0, 0, 0, 0, "60vw"],
+                    y: [0, 0, 0, 0, "-50vh"],
+                    rotate: [0, 0, 0, 0, -40],
                   }}
                   transition={{
-                    duration: 7.5,
-                    times: [0, 0.572, 0.62, 0.667, 0.76, 1],
+                    duration: 5.5,
+                    times: [0, 0.745, 0.78, 0.818, 1],
                     ease: [0.4, 0, 0.2, 1],
                   }}
                   className="w-40 h-40"
