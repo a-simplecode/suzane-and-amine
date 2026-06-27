@@ -3,19 +3,26 @@
 import * as THREE from "three";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { BEATS, lerp, seg, smooth, type Timeline } from "./timeline";
 import { makePaperTexture } from "./textures";
 import { FLIGHT_CURVE, FOLD_POS, HOME_PIN } from "./flight-path";
 
 const SHEET_L = 2.8;
 
-export function PaperPlaneFold({ tl }: { tl: RefObject<Timeline> }) {
+export function PaperPlaneFold({
+  tl,
+  windowChildren,
+}: {
+  tl: RefObject<Timeline>;
+  windowChildren?: ReactNode;
+}) {
   const root = useRef<THREE.Group>(null);
   const leftHinge = useRef<THREE.Group>(null);
   const rightHinge = useRef<THREE.Group>(null);
   const leftWing = useRef<THREE.Group>(null);
   const rightWing = useRef<THREE.Group>(null);
+  const planeWindow = useRef<THREE.Group>(null);
   const bank = useRef(0);
   const mats = useRef<THREE.MeshStandardMaterial[]>([]);
   const paperTex = useMemo(() => makePaperTexture(), []);
@@ -113,6 +120,16 @@ export function PaperPlaneFold({ tl }: { tl: RefObject<Timeline> }) {
         <group ref={rightWing} position={[0.33, 0, 0]}>
           {panel(0.67, 0.335, "wr")}
         </group>
+      </group>
+      {/* dark crease down the keel where the two body panels meet */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
+        <planeGeometry args={[0.012, SHEET_L]} />
+        <meshStandardMaterial color="#2f3a22" transparent opacity={0.25} depthWrite={false} roughness={1} />
+      </mesh>
+      {/* anchor for the cockpit-window avatars (filled by Avatars3D);
+          sits just above the keel near the nose */}
+      <group ref={planeWindow} position={[0, 0.04, SHEET_L * 0.18]}>
+        {windowChildren}
       </group>
     </group>
   );
