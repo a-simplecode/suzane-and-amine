@@ -1,6 +1,7 @@
 "use client";
 
 import * as THREE from "three";
+import type { Avatar } from "@/data/avatars";
 import { WORLD_LAND_PATHS } from "@/data/world-paths";
 import { LEBANON_BOUNDARY_LL } from "@/data/lebanon-boundary";
 import { PALETTE } from "@/lib/palette";
@@ -383,5 +384,68 @@ export function makeSealTexture(): THREE.CanvasTexture {
 
   draw();
   document.fonts.ready.then(draw);
+  return tex;
+}
+
+/**
+ * Flat-illustrated portrait bust on a transparent background, paper-doll
+ * style to match the scene. Head + hair + shoulders/garment; Amine also gets
+ * a trimmed beard + mustache. Used as a billboard map.
+ */
+export function makeAvatarTexture(a: Avatar): THREE.CanvasTexture {
+  const W = 256;
+  const H = 320;
+  const { canvas, ctx } = makeCanvas(W, H);
+  const cx = W / 2;
+
+  // shoulders / garment
+  ctx.fillStyle = a.garment;
+  ctx.beginPath();
+  ctx.moveTo(cx - 96, H);
+  ctx.quadraticCurveTo(cx - 90, 214, cx, 206);
+  ctx.quadraticCurveTo(cx + 90, 214, cx + 96, H);
+  ctx.closePath();
+  ctx.fill();
+
+  // long hair behind (Suzane) — drawn before the face
+  if (a.id === "suzane") {
+    ctx.fillStyle = a.hair;
+    ctx.beginPath();
+    ctx.ellipse(cx, 150, 86, 110, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // face
+  ctx.fillStyle = a.skin;
+  ctx.beginPath();
+  ctx.ellipse(cx, 132, 62, 74, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // hair cap on top
+  ctx.fillStyle = a.hair;
+  ctx.beginPath();
+  ctx.arc(cx, 118, 64, Math.PI, 0);
+  ctx.fill();
+  ctx.fillRect(cx - 64, 96, 128, 26);
+
+  // beard + mustache (Amine)
+  if (a.beard) {
+    ctx.fillStyle = a.beard;
+    ctx.beginPath();
+    ctx.ellipse(cx, 168, 56, 44, 0, 0, Math.PI);
+    ctx.fill();
+    ctx.fillRect(cx - 22, 150, 44, 10); // mustache
+  }
+
+  // eyes
+  ctx.fillStyle = "#2f2418";
+  ctx.beginPath();
+  ctx.arc(cx - 22, 132, 6, 0, Math.PI * 2);
+  ctx.arc(cx + 22, 132, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
   return tex;
 }

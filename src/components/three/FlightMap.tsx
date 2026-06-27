@@ -6,6 +6,7 @@ import { useFrame } from "@react-three/fiber";
 import type { RefObject } from "react";
 import { BEATS, easeOut3, seg, smooth, type Timeline } from "./timeline";
 import { makeLebanonTexture, makeMapTexture } from "./textures";
+import { MapAvatar } from "./Avatars3D";
 import {
   BEIRUT,
   FLIGHT_CURVE,
@@ -31,6 +32,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
   const ring = useRef<THREE.Mesh>(null);
   const clouds = useRef<THREE.Group>(null);
   const cities = useRef<THREE.Group>(null);
+  const vanAvatars = useRef<THREE.Group>(null);
   const trailRef = useRef<THREE.Line>(null);
   const house = useRef<THREE.Group>(null);
   const car = useRef<THREE.Group>(null);
@@ -123,6 +125,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
         (mesh.material as THREE.MeshBasicMaterial).opacity = 0.8 * zoomFade;
       });
     }
+    if (vanAvatars.current) vanAvatars.current.visible = zoomFade > 0;
 
     // Lebanon decal fades in on final approach to the house
     const landT = seg(t.p, BEATS.land[0], BEATS.land[1]);
@@ -195,6 +198,12 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
           </mesh>
         ))}
       </group>
+      {/* departure avatars — standing on Vancouver, world scale; hidden at
+          decal zoom via the vanAvatars visibility toggle in useFrame */}
+      <group ref={vanAvatars}>
+        <MapAvatar position={[VANCOUVER.x - 0.25, MAP_Y + 0.6, VANCOUVER.z]} which={0} size={0.7} />
+        <MapAvatar position={[VANCOUVER.x + 0.25, MAP_Y + 0.6, VANCOUVER.z]} which={1} size={0.7} />
+      </group>
       {/* dashed trail */}
       <primitive object={trailLine} ref={trailRef} />
       {/* Lebanon detail decal */}
@@ -232,6 +241,8 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
           <boxGeometry args={[0.0048, 0.0048, 0.001]} />
           <meshStandardMaterial color="#8a8266" roughness={0.7} />
         </mesh>
+        <MapAvatar position={[-0.012, 0.05, 0]} which={0} size={0.03} />
+        <MapAvatar position={[0.012, 0.05, 0]} which={1} size={0.03} />
       </group>
       {/* wedding car — olive body, white ribbon V + bow on the hood */}
       <group ref={car} visible={false} scale={0.75}>
