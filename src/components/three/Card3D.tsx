@@ -22,16 +22,16 @@ export function Card3D({ tl }: { tl: RefObject<Timeline> }) {
     if (!t || !g) return;
 
     const foldT = seg(t.p, BEATS.fold[0], BEATS.fold[1]);
-    // The card owns the intro reveal, then fades out so the hero photos own
-    // the frame during the photos beat, then swoops back in for the fold.
+    // The card owns the intro reveal, hides behind the hero photos, is drawn
+    // back (solid) just before the fold, then crossfades into the paper plane.
     let alpha = 1;
     if (t.intro >= 1) {
       alpha =
         t.p < BEATS.fold[0]
-          ? 1 - smooth(seg(t.p, BEATS.photos[0], BEATS.photos[0] + 0.04))
-          : smooth(seg(foldT, 0, 0.18));
+          ? smooth(seg(t.p, BEATS.fold[0] - 0.04, BEATS.fold[0])) // reappear pre-fold
+          : 1 - smooth(seg(foldT, 0.42, 0.55)); // crossfade out into the plane
     }
-    g.visible = t.opened && foldT < 0.5 && alpha > 0.01;
+    g.visible = t.opened && foldT < 0.55 && alpha > 0.01;
     if (!g.visible) return;
 
     g.traverse((n) => {

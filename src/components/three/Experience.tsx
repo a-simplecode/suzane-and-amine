@@ -11,7 +11,6 @@ import { Card3D } from "./Card3D";
 import { Polaroids } from "./Polaroids";
 import { PaperPlaneFold } from "./PaperPlaneFold";
 import { FlightMap } from "./FlightMap";
-import { CoupleWindow } from "./Avatars3D";
 import { CameraRig } from "./CameraRig";
 import { ContactGroundShadows } from "./ContactGroundShadows";
 
@@ -101,7 +100,7 @@ export function Experience({ label, opened, scrollProgress, onTapSeal, onIntroDo
       <Suspense fallback={null}>
         <Polaroids tl={tl} />
       </Suspense>
-      <PaperPlaneFold tl={tl} windowChildren={<CoupleWindow size={0.55} />} />
+      <PaperPlaneFold tl={tl} />
       <FlightMap tl={tl} />
       <CameraRig tl={tl} />
     </Canvas>

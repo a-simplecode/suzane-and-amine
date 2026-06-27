@@ -9,7 +9,7 @@ import { FLIGHT_CURVE, FOLD_POS, HOME_PIN, ROAD_CURVE, VENUE_PIN } from "./fligh
 
 // High over the fold point, looking down — the paper sheet then reads
 // against the map below it instead of vanishing into the beige sky/fog.
-const FOLD_CAM_OFFSET = new THREE.Vector3(1.3, 4.3, 2.7);
+const FOLD_CAM_OFFSET = new THREE.Vector3(1.7, 2.3, 4.0);
 
 export function CameraRig({ tl }: { tl: RefObject<Timeline> }) {
   const look = useRef(new THREE.Vector3(0, 0.1, 0));

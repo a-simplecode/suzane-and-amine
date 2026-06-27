@@ -47,16 +47,20 @@ export function PaperPlaneFold({
     const foldT = seg(t.p, BEATS.fold[0], BEATS.fold[1]);
     const flightT = seg(t.p, BEATS.flight[0], BEATS.flight[1]);
     const landT = seg(t.p, BEATS.land[0], BEATS.land[1]);
-    g.visible = t.opened && foldT >= 0.5 && landT < 0.6;
+    // appears a little before the fold midpoint so it can crossfade in as the
+    // flat card fades out (no hard swap)
+    g.visible = t.opened && foldT >= 0.42 && landT < 0.6;
     if (!g.visible) return;
 
-    // fold runs over the second half of the fold beat (card hands off at 0.5)
+    // fold runs over the second half of the fold beat (card hands off at 0.5).
+    // Shallow dihedral so it reads as a flat paper dart with slightly raised
+    // wings — not two vertical slabs.
     const fs = smooth(seg(foldT, 0.5, 1));
-    const A = 1.15 * fs;
+    const A = 0.5 * fs;
     if (leftHinge.current) leftHinge.current.rotation.z = -A;
     if (rightHinge.current) rightHinge.current.rotation.z = A;
-    if (leftWing.current) leftWing.current.rotation.z = A * 1.1;
-    if (rightWing.current) rightWing.current.rotation.z = -A * 1.1;
+    if (leftWing.current) leftWing.current.rotation.z = A * 1.5;
+    if (rightWing.current) rightWing.current.rotation.z = -A * 1.5;
 
     if (flightT <= 0) {
       g.position.copy(FOLD_POS);
@@ -83,8 +87,11 @@ export function PaperPlaneFold({
       }
     }
 
-    // touch down + fade as the house takes focus
-    const o = landT > 0.15 ? 1 - seg(landT, 0.15, 0.5) : 1;
+    // crossfade in from the card at the fold seam, hold, then fade as the
+    // house takes focus on landing
+    const foldIn = smooth(seg(foldT, 0.42, 0.55));
+    const landOut = landT > 0.1 ? 1 - seg(landT, 0.1, 0.45) : 1;
+    const o = foldIn * landOut;
     for (const m of mats.current) m.opacity = o;
   });
 

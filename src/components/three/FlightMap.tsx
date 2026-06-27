@@ -140,19 +140,29 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
         (mesh.material as THREE.MeshBasicMaterial).opacity = 0.8 * zoomFade;
       });
     }
-    if (vanAvatars.current) vanAvatars.current.visible = zoomFade > 0;
+    // Departure couple: appear briefly as the plane sets off from Vancouver,
+    // then recede. Hidden during the fold (camera hovers right over them) and
+    // late flight so they never loom in the frame.
+    if (vanAvatars.current) {
+      const dep =
+        smooth(seg(t.p, BEATS.flight[0], BEATS.flight[0] + 0.05)) *
+        (1 - smooth(seg(t.p, BEATS.flight[0] + 0.1, BEATS.flight[0] + 0.26)));
+      vanAvatars.current.visible = dep > 0.01 && zoomFade > 0;
+      vanAvatars.current.traverse((n) => {
+        const mesh = n as THREE.Mesh;
+        if (mesh.isMesh) (mesh.material as THREE.MeshBasicMaterial).opacity = dep;
+      });
+    }
 
     // Lebanon decal fades in on final approach to the house
     const landT = seg(t.p, BEATS.land[0], BEATS.land[1]);
     const driveT = seg(t.p, BEATS.drive[0], BEATS.drive[1]);
     const at = seg(t.p, BEATS.arrive[0], BEATS.arrive[1]);
-    if (decalMat.current) {
-      decalMat.current.opacity = smooth(seg(t.p, BEATS.flight[1] - 0.06, BEATS.land[0] + 0.03));
-    }
-    if (decalShadowMat.current) {
-      decalShadowMat.current.opacity =
-        0.18 * smooth(seg(t.p, BEATS.flight[1] - 0.06, BEATS.land[0] + 0.03));
-    }
+    // decal zooms in only once the landing begins, so the flight stays a
+    // clean plane-over-world-map shot (no giant plane over the close-up)
+    const decalIn = smooth(seg(t.p, BEATS.land[0] - 0.005, BEATS.land[0] + 0.07));
+    if (decalMat.current) decalMat.current.opacity = decalIn;
+    if (decalShadowMat.current) decalShadowMat.current.opacity = 0.18 * decalIn;
 
     // Suzane's home pops up as the plane lands
     if (house.current) {
