@@ -22,7 +22,6 @@ export function PaperPlaneFold({
   const rightHinge = useRef<THREE.Group>(null);
   const leftWing = useRef<THREE.Group>(null);
   const rightWing = useRef<THREE.Group>(null);
-  const planeWindow = useRef<THREE.Group>(null);
   const bank = useRef(0);
   const mats = useRef<THREE.MeshStandardMaterial[]>([]);
   const paperTex = useMemo(() => makePaperTexture(), []);
@@ -128,7 +127,7 @@ export function PaperPlaneFold({
       </mesh>
       {/* anchor for the cockpit-window avatars (filled by Avatars3D);
           sits just above the keel near the nose */}
-      <group ref={planeWindow} position={[0, 0.04, SHEET_L * 0.18]}>
+      <group position={[0, 0.04, SHEET_L * 0.18]}>
         {windowChildren}
       </group>
     </group>
