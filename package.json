@@ -10,6 +10,7 @@
     "photos": "node scripts/prepare-photos.mjs"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "framer-motion": "^12.40.0",
     "lottie-react": "^2.4.1",

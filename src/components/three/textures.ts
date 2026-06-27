@@ -3,14 +3,9 @@
 import * as THREE from "three";
 import { WORLD_LAND_PATHS } from "@/data/world-paths";
 import { LEBANON_BOUNDARY_LL } from "@/data/lebanon-boundary";
+import { PALETTE } from "@/lib/palette";
 
-const COL = {
-  beige: "#f1e9da",
-  beigeWarm: "#e8dfc9",
-  ink: "#2f3a22",
-  olive: "#6b7a4b",
-  oliveSoft: "#8b9968",
-};
+const COL = PALETTE;
 
 /** Resolve the real (hashed) Cormorant family name from the .font-display class. */
 function displayFontFamily(): string {
