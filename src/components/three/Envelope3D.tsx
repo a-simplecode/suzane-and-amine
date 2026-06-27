@@ -123,20 +123,20 @@ export function Envelope3D({ tl, label, onTapSeal }: Props) {
 
   return (
     <group ref={root}>
-      {/* back face */}
-      <mesh position={[0, 0, -0.05]}>
-        <planeGeometry args={[W, H]} />
-        <meshStandardMaterial ref={collect} color="#e3d9c2" map={paperTex} transparent roughness={0.9} />
-      </mesh>
-      {/* front face with guest label */}
-      <mesh>
-        <planeGeometry args={[W, H]} />
-        <meshStandardMaterial ref={collect} map={envTex} transparent roughness={0.85} />
+      {/* envelope body — thin box so edges catch light; front face textured */}
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[W, H, 0.06]} />
+        <meshStandardMaterial ref={collect} color="#e3d9c2" map={paperTex} transparent roughness={0.9} attach="material-0" />
+        <meshStandardMaterial ref={collect} color="#e3d9c2" map={paperTex} transparent roughness={0.9} attach="material-1" />
+        <meshStandardMaterial ref={collect} color="#e3d9c2" map={paperTex} transparent roughness={0.9} attach="material-2" />
+        <meshStandardMaterial ref={collect} color="#e3d9c2" map={paperTex} transparent roughness={0.9} attach="material-3" />
+        <meshStandardMaterial ref={collect} map={envTex} transparent roughness={0.85} attach="material-4" />
+        <meshStandardMaterial ref={collect} color="#e3d9c2" map={paperTex} transparent roughness={0.9} attach="material-5" />
       </mesh>
       {/* flap, hinged at the top edge */}
-      <group ref={flap} position={[0, H / 2, 0.01]}>
-        <mesh>
-          <shapeGeometry args={[flapShape]} />
+      <group ref={flap} position={[0, H / 2, 0.03]}>
+        <mesh castShadow>
+          <extrudeGeometry args={[flapShape, { depth: 0.05, bevelEnabled: false }]} />
           <meshStandardMaterial
             ref={collect}
             color="#e8dfc9"
