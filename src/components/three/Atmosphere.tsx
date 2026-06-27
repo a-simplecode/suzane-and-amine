@@ -3,8 +3,10 @@
 import * as THREE from "three";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { Environment } from "@react-three/drei";
 import type { RefObject } from "react";
 import { BEATS, seg, smooth, type Timeline } from "./timeline";
+import { PALETTE } from "@/lib/palette";
 
 const DUST_COUNT_DESKTOP = 140;
 const DUST_COUNT_TOUCH = 70;
@@ -47,11 +49,29 @@ export function Atmosphere({ tl }: { tl: RefObject<Timeline> }) {
 
   return (
     <>
-      {/* Attach fog declaratively to the parent scene — avoids mutating useThree() refs. */}
-      <fog attach="fog" args={["#f1e9da", 16, 44]} />
-      <ambientLight intensity={0.85} color="#fff6e8" />
-      <directionalLight position={[3, 5, 4]} intensity={1.3} color="#fffdf5" />
-      <hemisphereLight args={["#fdf6e3", "#b9b49a", 0.35]} />
+      {/* Attach fog declaratively — fogFar reads cooler/darker than the
+          beige bg so distance fade becomes a depth cue, not a flat wash. */}
+      <fog attach="fog" args={[PALETTE.fogFar, 16, 44]} />
+      {/* generated studio environment — soft specular life on paper, no
+          HDR file fetched (resolution kept small for the perf budget) */}
+      <Environment resolution={64} environmentIntensity={0.35}>
+        <mesh scale={50}>
+          <sphereGeometry args={[1, 16, 16]} />
+          <meshBasicMaterial color={PALETTE.beige} side={THREE.BackSide} />
+        </mesh>
+        <mesh position={[4, 6, 3]} scale={6}>
+          <planeGeometry />
+          <meshBasicMaterial color={PALETTE.lightKey} />
+        </mesh>
+      </Environment>
+      {/* warm key + cool fill so forms read in 3D instead of going flat */}
+      <ambientLight intensity={0.5} color={PALETTE.lightFill} />
+      <directionalLight
+        position={[3, 5, 4]}
+        intensity={1.0}
+        color={PALETTE.lightKey}
+      />
+      <hemisphereLight args={[PALETTE.lightFill, PALETTE.lightGround, 0.4]} />
       <points ref={points}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
