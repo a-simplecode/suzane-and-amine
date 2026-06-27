@@ -76,11 +76,14 @@ export function Experience({ label, opened, scrollProgress, onTapSeal, onIntroDo
 
   return (
     <Canvas
-      flat
       dpr={[1, 1.5]}
       camera={{ fov: 42, position: [0, 0.25, 7] }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      onCreated={({ gl }) => gl.setClearColor(new THREE.Color("#f1e9da"), 0)}
+      onCreated={({ gl }) => {
+        gl.setClearColor(new THREE.Color("#f1e9da"), 0);
+        gl.toneMapping = THREE.ACESFilmicToneMapping;
+        gl.toneMappingExposure = 1.05;
+      }}
     >
       <Driver timeline={tlObj} opened={opened} scrollProgress={scrollProgress} onIntroDone={onIntroDone} />
       <Atmosphere tl={tl} />
