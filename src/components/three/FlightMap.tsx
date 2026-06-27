@@ -28,6 +28,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
   const root = useRef<THREE.Group>(null);
   const mapMat = useRef<THREE.MeshStandardMaterial>(null);
   const decalMat = useRef<THREE.MeshBasicMaterial>(null);
+  const decalShadowMat = useRef<THREE.MeshBasicMaterial>(null);
   const pin = useRef<THREE.Group>(null);
   const ring = useRef<THREE.Mesh>(null);
   const clouds = useRef<THREE.Group>(null);
@@ -36,6 +37,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
   const trailRef = useRef<THREE.Line>(null);
   const house = useRef<THREE.Group>(null);
   const car = useRef<THREE.Group>(null);
+  const planeShadow = useRef<THREE.Mesh>(null);
   const carTmp = useMemo(
     () => ({
       pos: new THREE.Vector3(),
@@ -56,7 +58,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
     const line = new THREE.Line(
       geo,
       new THREE.LineDashedMaterial({
-        color: "#6b7a4b",
+        color: "#c8a96a",
         dashSize: 0.3,
         gapSize: 0.18,
         transparent: true,
@@ -118,6 +120,19 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
       (trail.material as THREE.LineDashedMaterial).opacity = 0.85 * zoomFade;
       trail.visible = zoomFade > 0;
     }
+    // soft shadow tracking the plane's ground point during flight
+    if (planeShadow.current) {
+      const fly = seg(t.p, BEATS.flight[0], BEATS.flight[1]);
+      const show = fly > 0 && fly < 1;
+      planeShadow.current.visible = show && zoomFade > 0;
+      if (show) {
+        const fe = smooth(fly);
+        FLIGHT_CURVE.getPointAt(fe, carTmp.pos); // reuse scratch vec
+        planeShadow.current.position.set(carTmp.pos.x, MAP_Y + 0.025, carTmp.pos.z);
+        (planeShadow.current.material as THREE.MeshBasicMaterial).opacity =
+          0.22 * zoomFade;
+      }
+    }
     if (cities.current) {
       cities.current.visible = zoomFade > 0;
       cities.current.children.forEach((c) => {
@@ -134,6 +149,10 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
     if (decalMat.current) {
       decalMat.current.opacity = smooth(seg(t.p, BEATS.flight[1] - 0.06, BEATS.land[0] + 0.03));
     }
+    if (decalShadowMat.current) {
+      decalShadowMat.current.opacity =
+        0.18 * smooth(seg(t.p, BEATS.flight[1] - 0.06, BEATS.land[0] + 0.03));
+    }
 
     // Suzane's home pops up as the plane lands
     if (house.current) {
@@ -149,6 +168,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
       const d = smooth(driveT);
       ROAD_CURVE.getPointAt(d, carTmp.pos);
       car.current.position.copy(carTmp.pos);
+      car.current.position.y += 0.04;
       ROAD_CURVE.getTangentAt(Math.min(0.98, Math.max(0.02, d)), carTmp.tan);
       carTmp.tan.setY(0).normalize();
       carTmp.q.setFromUnitVectors(carTmp.zAxis, carTmp.tan);
@@ -159,7 +179,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
     if (pin.current) {
       pin.current.visible = at > 0.1;
       const drop = easeOut3(seg(at, 0.1, 0.55));
-      pin.current.position.set(VENUE_PIN.x, VENUE_PIN.y + (1 - drop) * 0.2, VENUE_PIN.z);
+      pin.current.position.set(VENUE_PIN.x, VENUE_PIN.y + 0.04 + (1 - drop) * 0.2, VENUE_PIN.z);
     }
     if (ring.current) {
       const drop = easeOut3(seg(at, 0.1, 0.55));
@@ -206,16 +226,29 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
       </group>
       {/* dashed trail */}
       <primitive object={trailLine} ref={trailRef} />
-      {/* Lebanon detail decal */}
+      {/* moving plane shadow on the world map */}
+      <mesh ref={planeShadow} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
+        <circleGeometry args={[0.45, 24]} />
+        <meshBasicMaterial color="#2f3a22" transparent opacity={0} depthWrite={false} />
+      </mesh>
+      {/* drop shadow under the lifted Lebanon cutout */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[LEB_DECAL_CENTER.x, MAP_Y + 0.01, LEB_DECAL_CENTER.z]}
+        position={[LEB_DECAL_CENTER.x + 0.06, MAP_Y + 0.012, LEB_DECAL_CENTER.z + 0.08]}
+      >
+        <planeGeometry args={[LEB_DECAL_W * 0.96, LEB_DECAL_H * 0.96]} />
+        <meshBasicMaterial ref={decalShadowMat} color="#2f3a22" transparent opacity={0} depthWrite={false} />
+      </mesh>
+      {/* Lebanon detail decal, lifted to read as cut paper */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[LEB_DECAL_CENTER.x, MAP_Y + 0.05, LEB_DECAL_CENTER.z]}
       >
         <planeGeometry args={[LEB_DECAL_W, LEB_DECAL_H]} />
         <meshBasicMaterial ref={decalMat} map={lebTex} transparent opacity={0} depthWrite={false} />
       </mesh>
       {/* Suzane's home — landing spot */}
-      <group ref={house} position={[HOME_PIN.x, HOME_PIN.y, HOME_PIN.z]} visible={false}>
+      <group ref={house} position={[HOME_PIN.x, HOME_PIN.y + 0.04, HOME_PIN.z]} visible={false}>
         {/* grounding shadow */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.003, 0.001, 0.003]}>
           <circleGeometry args={[0.021, 24]} />
@@ -296,7 +329,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
       {/* pulse ring */}
       <mesh
         ref={ring}
-        position={[VENUE_PIN.x, VENUE_PIN.y + 0.003, VENUE_PIN.z]}
+        position={[VENUE_PIN.x, VENUE_PIN.y + 0.043, VENUE_PIN.z]}
         rotation={[-Math.PI / 2, 0, 0]}
       >
         <ringGeometry args={[0.017, 0.022, 32]} />

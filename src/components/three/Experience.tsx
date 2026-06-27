@@ -13,6 +13,7 @@ import { PaperPlaneFold } from "./PaperPlaneFold";
 import { FlightMap } from "./FlightMap";
 import { CoupleWindow } from "./Avatars3D";
 import { CameraRig } from "./CameraRig";
+import { ContactGroundShadows } from "./ContactGroundShadows";
 
 type Props = {
   label: string;
@@ -88,6 +89,7 @@ export function Experience({ label, opened, scrollProgress, onTapSeal, onIntroDo
     >
       <Driver timeline={tlObj} opened={opened} scrollProgress={scrollProgress} onIntroDone={onIntroDone} />
       <Atmosphere tl={tl} />
+      <ContactGroundShadows tl={tl} />
       <Envelope3D tl={tl} label={label} onTapSeal={onTapSeal} />
       <Card3D tl={tl} />
       <Suspense fallback={null}>
