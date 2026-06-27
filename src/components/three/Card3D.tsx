@@ -50,13 +50,14 @@ export function Card3D({ tl }: { tl: RefObject<Timeline> }) {
 
   return (
     <group ref={root} visible={false}>
-      <mesh>
-        <planeGeometry args={[CARD_W, CARD_H]} />
-        <meshStandardMaterial map={cardTex} roughness={0.85} />
-      </mesh>
-      <mesh rotation={[0, Math.PI, 0]} position={[0, 0, -0.005]}>
-        <planeGeometry args={[CARD_W, CARD_H]} />
-        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} />
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[CARD_W, CARD_H, 0.03]} />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-0" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-1" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-2" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-3" />
+        <meshStandardMaterial map={cardTex} roughness={0.85} attach="material-4" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-5" />
       </mesh>
     </group>
   );
