@@ -42,8 +42,16 @@ export function CameraRig({ tl }: { tl: RefObject<Timeline> }) {
     const baseZ = Math.max(7, 2.3 / (halfTan * pc.aspect));
 
     if (flightT <= 0) {
-      // intro dolly-in → photos pull → travel toward the fold viewpoint
-      tmp.pos.set(0, 0.25 + 0.35 * photoT, baseZ - 0.8 * introE - 0.9 * photoT);
+      // intro dolly-in → photos pull → travel toward the fold viewpoint.
+      // A 3/4 tilt (up + to the right) during the intro lets the envelope's
+      // thickness, flap edge, and contact shadow read; it relaxes toward a
+      // frontal view as the guest scrolls into the photos so the card reads.
+      const tilt = 1 - photoT;
+      tmp.pos.set(
+        0.85 * tilt,
+        0.25 + 0.95 * tilt + 0.35 * photoT,
+        baseZ - 0.8 * introE - 0.9 * photoT,
+      );
       tmp.lk.set(0, 0.1, 0);
       if (foldT > 0) {
         // travel during the first half of the fold beat so the camera is

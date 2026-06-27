@@ -49,29 +49,30 @@ export function Atmosphere({ tl }: { tl: RefObject<Timeline> }) {
 
   return (
     <>
-      {/* Attach fog declaratively — fogFar reads cooler/darker than the
-          beige bg so distance fade becomes a depth cue, not a flat wash. */}
-      <fog attach="fog" args={[PALETTE.fogFar, 16, 44]} />
+      {/* Fog fades distant geometry into the dark candlelit stage so the
+          beige paper near the camera reads as lit against shadow. */}
+      <fog attach="fog" args={[PALETTE.stageMid, 18, 50]} />
       {/* generated studio environment — soft specular life on paper, no
           HDR file fetched (resolution kept small for the perf budget) */}
-      <Environment resolution={64} environmentIntensity={0.35}>
+      <Environment resolution={64} environmentIntensity={0.2}>
         <mesh scale={50}>
           <sphereGeometry args={[1, 16, 16]} />
-          <meshBasicMaterial color={PALETTE.beige} side={THREE.BackSide} />
+          <meshBasicMaterial color={PALETTE.stageMid} side={THREE.BackSide} />
         </mesh>
-        <mesh position={[4, 6, 3]} scale={6}>
+        <mesh position={[5, 7, 4]} scale={7}>
           <planeGeometry />
           <meshBasicMaterial color={PALETTE.lightKey} />
         </mesh>
       </Environment>
-      {/* warm key + cool fill so forms read in 3D instead of going flat */}
-      <ambientLight intensity={0.5} color={PALETTE.lightFill} />
+      {/* strong warm key + low cool fill → paper has a clear lit/shadow
+          gradient instead of flat uniform brightness */}
+      <ambientLight intensity={0.22} color={PALETTE.lightFill} />
       <directionalLight
-        position={[3, 5, 4]}
-        intensity={1.0}
+        position={[4, 6, 4]}
+        intensity={1.9}
         color={PALETTE.lightKey}
       />
-      <hemisphereLight args={[PALETTE.lightFill, PALETTE.lightGround, 0.4]} />
+      <hemisphereLight args={[PALETTE.lightFill, PALETTE.stageMid, 0.3]} />
       <points ref={points}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />

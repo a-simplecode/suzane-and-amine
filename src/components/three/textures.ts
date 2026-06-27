@@ -155,13 +155,13 @@ export function makeLebanonTexture(): THREE.CanvasTexture {
   const draw = () => {
     const fam = displayFontFamily();
 
-    // sea
+    // dark sea — matches the world-map stage so the warm Lebanon paper glows
     ctx.globalAlpha = 1;
-    ctx.fillStyle = "#e5dcc3";
+    ctx.fillStyle = COL.stageMid;
     ctx.fillRect(0, 0, W, H);
 
-    // gentle wave strokes across the sea
-    ctx.strokeStyle = "rgba(107,122,75,0.10)";
+    // gentle wave strokes across the sea (faint gold)
+    ctx.strokeStyle = "rgba(200,169,106,0.10)";
     ctx.lineWidth = 2.5;
     for (let i = 0; i < 30; i++) {
       const y = (i / 30) * H + 22;
@@ -189,7 +189,7 @@ export function makeLebanonTexture(): THREE.CanvasTexture {
     ctx.fillStyle = "#eee5d1";
     ctx.fill();
     ctx.lineJoin = "round";
-    ctx.strokeStyle = COL.olive;
+    ctx.strokeStyle = COL.gold;
     ctx.lineWidth = 5;
     ctx.stroke();
 
@@ -239,14 +239,16 @@ export function makeLebanonTexture(): THREE.CanvasTexture {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Beirut dot + label
+    // Beirut dot (gold) + label (light, reads on the dark sea)
     const bx = px(35.5018);
     const by = py(33.8938);
-    ctx.fillStyle = COL.ink;
-    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = COL.gold;
+    ctx.globalAlpha = 1;
     ctx.beginPath();
     ctx.arc(bx, by, 9, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = COL.beige;
+    ctx.globalAlpha = 0.92;
     ctx.font = `500 44px ${fam}`;
     ctx.textAlign = "right";
     ctx.fillText("Beirut", bx - 24, by + 16);
@@ -256,6 +258,7 @@ export function makeLebanonTexture(): THREE.CanvasTexture {
     const hy = py(33.8120051);
     const vx = px(35.6032562);
     const vy = py(33.9514617);
+    ctx.fillStyle = COL.beige;
     ctx.font = `italic 500 46px ${fam}`;
     ctx.textAlign = "left";
     ctx.fillText("Suzane’s home", hx + 40, hy + 64);
@@ -264,12 +267,12 @@ export function makeLebanonTexture(): THREE.CanvasTexture {
     ctx.fillText("L’Heritage Venue", vx - 44, vy - 30);
     ctx.globalAlpha = 1;
 
-    // sea lettering, set along the coast
+    // sea lettering, set along the coast (faint gold)
     ctx.save();
     ctx.translate(px(35.07), py(33.95));
     ctx.rotate(-1.05);
     ctx.font = `italic 400 52px ${fam}`;
-    ctx.fillStyle = "rgba(107,122,75,0.5)";
+    ctx.fillStyle = "rgba(200,169,106,0.45)";
     ctx.textAlign = "left";
     ctx.fillText("M e d i t e r r a n e a n   S e a", 0, 0);
     ctx.restore();
@@ -290,24 +293,13 @@ export function makeMapTexture(): THREE.CanvasTexture {
   const W = 2048;
   const H = 1024;
   const { canvas, ctx } = makeCanvas(W, H);
-  ctx.fillStyle = "#ede4d0";
+  // dark "sea" so the map blends into the candlelit stage and the warm
+  // paper landmasses glow as cut-paper continents
+  ctx.fillStyle = COL.stageMid;
   ctx.fillRect(0, 0, W, H);
-  ctx.save();
-  ctx.scale(W / 720, H / 360);
-  for (const d of WORLD_LAND_PATHS) {
-    const path = new Path2D(d);
-    ctx.fillStyle = COL.oliveSoft;
-    ctx.globalAlpha = 0.45;
-    ctx.fill(path);
-    ctx.globalAlpha = 0.7;
-    ctx.strokeStyle = COL.olive;
-    ctx.lineWidth = 0.4;
-    ctx.stroke(path);
-  }
-  ctx.restore();
-  // faint graticule
-  ctx.strokeStyle = COL.olive;
-  ctx.globalAlpha = 0.08;
+  // faint graticule on the dark sea
+  ctx.strokeStyle = COL.oliveSoft;
+  ctx.globalAlpha = 0.06;
   ctx.lineWidth = 1;
   for (let x = 0; x <= W; x += W / 24) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
@@ -316,6 +308,19 @@ export function makeMapTexture(): THREE.CanvasTexture {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
   }
   ctx.globalAlpha = 1;
+  ctx.save();
+  ctx.scale(W / 720, H / 360);
+  for (const d of WORLD_LAND_PATHS) {
+    const path = new Path2D(d);
+    ctx.fillStyle = COL.beigeWarm;
+    ctx.globalAlpha = 0.9;
+    ctx.fill(path);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = COL.gold;
+    ctx.lineWidth = 0.4;
+    ctx.stroke(path);
+  }
+  ctx.restore();
 
   // city labels so the takeoff and destination read on the map
   const label = (text: string, lon: number, lat: number, dx: number, dy: number) => {
@@ -323,9 +328,9 @@ export function makeMapTexture(): THREE.CanvasTexture {
     const y = ((90 - lat) / 180) * H + dy;
     ctx.fillText(text, x, y);
   };
-  ctx.fillStyle = COL.ink;
-  ctx.globalAlpha = 0.85;
-  ctx.font = "500 16px Georgia, serif";
+  ctx.fillStyle = COL.beige;
+  ctx.globalAlpha = 0.92;
+  ctx.font = "500 17px Georgia, serif";
   ctx.textAlign = "left";
   const cityDot = (lon: number, lat: number) => {
     const x = ((lon + 180) / 360) * W;

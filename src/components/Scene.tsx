@@ -146,7 +146,7 @@ function FullScene({ invite }: { invite: Invite }) {
   }, [introDone]);
 
   return (
-    <main className="relative bg-bg-beige text-ink-olive-deep">
+    <main className="relative text-bg-beige">
       <audio ref={audioRef} src="/perfect.mp3" preload="metadata" playsInline />
       <div className="grain-overlay" />
 
@@ -190,7 +190,7 @@ function FullScene({ invite }: { invite: Invite }) {
             animate={{ opacity: 1 }}
             className="fixed bottom-[7vh] inset-x-0 flex flex-col items-center gap-2 pointer-events-none z-10"
           >
-            <span className="text-[10px] uppercase tracking-[0.3em] text-accent-olive">scroll</span>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-accent-gold">scroll</span>
             <span className="scroll-hint-line" />
           </motion.div>
         )}
@@ -203,7 +203,7 @@ function FullScene({ invite }: { invite: Invite }) {
           <h1 className="font-display text-[clamp(2.2rem,9vw,4.5rem)] leading-tight">
             Suzane <span className="opacity-60">&amp;</span> Amine
           </h1>
-          <p className="mt-1 text-[clamp(0.6rem,2.4vw,0.8rem)] uppercase tracking-[0.3em] text-accent-olive">
+          <p className="mt-1 text-[clamp(0.6rem,2.4vw,0.8rem)] uppercase tracking-[0.3em] text-accent-gold">
             are getting married
           </p>
         </motion.div>
@@ -242,7 +242,7 @@ function FullScene({ invite }: { invite: Invite }) {
           <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
             Nahr El Kalb, Lebanon
           </p>
-          <p className="mt-1 text-[clamp(0.6rem,2.4vw,0.8rem)] uppercase tracking-[0.25em] text-accent-olive">
+          <p className="mt-1 text-[clamp(0.6rem,2.4vw,0.8rem)] uppercase tracking-[0.25em] text-accent-gold">
             August 29, 2026
           </p>
         </motion.div>

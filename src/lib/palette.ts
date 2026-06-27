@@ -15,4 +15,8 @@ export const PALETTE = {
   lightFill: "#cfd6c0", // cool hemisphere top
   lightGround: "#b9b49a", // hemisphere ground
   fogFar: "#e6e0cf", // slightly cooler/darker than beige → depth
+  // dark candlelit stage (mirrors globals.css --stage-*)
+  stageLit: "#3a4429",
+  stageMid: "#232a18",
+  stageDark: "#11150c",
 } as const;

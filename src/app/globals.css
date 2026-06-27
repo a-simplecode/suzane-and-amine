@@ -6,6 +6,11 @@
   --ink-olive-deep: #2f3a22;
   --accent-olive: #6b7a4b;
   --accent-olive-soft: #8b9968;
+  --accent-gold: #c8a96a;
+  /* dark candlelit stage so the beige paper objects pop */
+  --stage-lit: #3a4429;
+  --stage-mid: #232a18;
+  --stage-dark: #11150c;
 }
 
 @theme inline {
@@ -14,14 +19,20 @@
   --color-ink-olive-deep: var(--ink-olive-deep);
   --color-accent-olive: var(--accent-olive);
   --color-accent-olive-soft: var(--accent-olive-soft);
+  --color-accent-gold: var(--accent-gold);
+  --color-stage-lit: var(--stage-lit);
+  --color-stage-mid: var(--stage-mid);
+  --color-stage-dark: var(--stage-dark);
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);
 }
 
 html,
 body {
-  background: var(--bg-beige);
-  color: var(--ink-olive-deep);
+  background:
+    radial-gradient(125% 95% at 50% 36%, var(--stage-lit) 0%, var(--stage-mid) 46%, var(--stage-dark) 100%)
+      fixed;
+  color: var(--bg-beige);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
