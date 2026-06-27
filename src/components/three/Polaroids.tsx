@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import type { RefObject } from "react";
 import { PHOTOS } from "@/data/photos";
-import { BEATS, seg, smooth, type Timeline } from "./timeline";
+import { BEATS, lerp, seg, smooth, type Timeline } from "./timeline";
 
 // Each photo owns a sequential slice of the photos beat and plays as a large
 // centered "hero" still. Windows are padded so neighbours crossfade.
@@ -68,18 +68,25 @@ export function Polaroids({ tl }: { tl: RefObject<Timeline> }) {
       if (!slot || !rig) return;
       // tt: 0..1 across this photo's padded window
       const tt = seg(t.p, slot.start, slot.end);
-      // crossfade envelope: fade in over first 16%, out over last 16%
-      const fade =
-        smooth(Math.min(1, tt / 0.16)) * smooth(Math.min(1, (1 - tt) / 0.16));
+
+      // Each photo is "drawn out of the invitation": it starts small, low and
+      // set back, then rises + grows toward the viewer over the first ~60% of
+      // its window (slow, fully scroll-paced), holds with a faint Ken Burns
+      // push, then lifts away and fades as the next one is drawn out.
+      const enter = smooth(Math.min(1, tt / 0.6)); // slow draw-out
+      const exit = smooth(Math.max(0, (tt - 0.82) / 0.18)); // lift away at the end
+      const fade = smooth(Math.min(1, tt / 0.28)) * (1 - exit);
       child.visible = fade > 0.001;
       if (!child.visible) return;
 
-      // slow cinematic push-in + lateral Ken Burns drift (gentle so the
-      // whole frame stays visible — never crops past the edges)
-      const push = 1 + smooth(tt) * 0.04;
-      child.scale.setScalar(push);
-      child.position.set(rig.dir * (tt - 0.5) * 0.25, 0.1 + (tt - 0.5) * 0.08, 3.3);
-      child.rotation.z = rig.rot * (1 - smooth(tt) * 0.5);
+      const ken = smooth(tt) * 0.04; // gentle hold-phase push
+      child.scale.setScalar(lerp(0.5, 1, enter) * (1 + ken) * (1 - exit * 0.08));
+      child.position.set(
+        rig.dir * (tt - 0.5) * 0.16, // gentle lateral drift
+        lerp(-0.55, 0.1, enter) + exit * 0.3, // rise out of the invitation, ease away
+        lerp(2.0, 3.3, enter), // drawn forward toward the viewer
+      );
+      child.rotation.z = rig.rot * (1 - enter * 0.6);
 
       child.traverse((n) => {
         const mesh = n as THREE.Mesh;
