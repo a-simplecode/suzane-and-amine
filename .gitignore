@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# raw photo originals (web-sized versions live in public/images/web)
+public/images/*.JPG
+public/images/*.jpg
+public/images/*.jpeg
+public/images/*.png

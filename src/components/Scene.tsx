@@ -1,33 +1,38 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import {
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Invite } from "@/lib/invites";
+import { detectTier, type Tier } from "@/lib/quality";
 import { Countdown } from "./Countdown";
-import { Envelope } from "./Envelope";
-import { InvitationCard } from "./InvitationCard";
+import { FallbackScene } from "./FallbackScene";
 import { MusicToggle } from "./MusicToggle";
-import { PaperPlane } from "./PaperPlane";
 import { RsvpForm } from "./RsvpForm";
 import { ThankYou } from "./ThankYou";
 import { VenueCard } from "./VenueCard";
-import { WorldMap } from "./WorldMap";
 
-type Beat = "card" | "map" | "venue" | "rsvp" | "thanks";
+const Experience = dynamic(() => import("./three/Experience"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-bg-beige" />,
+});
+
+type Beat = "story" | "rsvp" | "thanks";
 
 const PENDING_KEY = "pending-rsvp";
 
-type Props = {
-  invite: Invite;
-};
+export function Scene({ invite }: { invite: Invite }) {
+  const [tier, setTier] = useState<Tier | null>(null);
+  useEffect(() => {
+    queueMicrotask(() => setTier(detectTier()));
+  }, []);
 
-export function Scene({ invite }: Props) {
-  const [beat, setBeat] = useState<Beat>("card");
-  const [opened, setOpened] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [musicStarted, setMusicStarted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
+  // offline RSVP retry — applies to both tiers
   useEffect(() => {
     const retry = async () => {
       try {
@@ -46,14 +51,48 @@ export function Scene({ invite }: Props) {
     return () => window.removeEventListener("focus", retry);
   }, []);
 
+  if (tier === null) return <main className="min-h-dvh bg-bg-beige" />;
+  if (tier === "lite") return <FallbackScene invite={invite} />;
+  return <FullScene invite={invite} />;
+}
+
+function FullScene({ invite }: { invite: Invite }) {
+  const [opened, setOpened] = useState(false);
+  const [introDone, setIntroDone] = useState(false);
+  const [beat, setBeat] = useState<Beat>("story");
+  const [muted, setMuted] = useState(false);
+  const [musicStarted, setMusicStarted] = useState(false);
+  const [hintVisible, setHintVisible] = useState(false);
+  const [venueSeen, setVenueSeen] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const introDoneRef = useRef(false);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    // Before the intro the container is viewport-sized, so progress is
+    // degenerate (reads 1) — ignore everything until the intro is done.
+    if (!introDoneRef.current) return;
+    setHintVisible(v < 0.03);
+    if (v > 0.88) setVenueSeen(true);
+  });
+
+  const photosTextO = useTransform(scrollYProgress, [0.04, 0.08, 0.15, 0.18], [0, 1, 1, 0]);
+  const flightTextO = useTransform(scrollYProgress, [0.32, 0.38, 0.5, 0.56], [0, 1, 1, 0]);
+  const landTextO = useTransform(scrollYProgress, [0.57, 0.61, 0.65, 0.68], [0, 1, 1, 0]);
+  const driveTextO = useTransform(scrollYProgress, [0.69, 0.73, 0.77, 0.8], [0, 1, 1, 0]);
+  const arriveTextO = useTransform(scrollYProgress, [0.81, 0.85, 0.9, 0.94], [0, 1, 1, 0]);
+
   const startMusic = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio) {
-      setMusicStarted(true);
-      return;
+    if (audio) {
+      audio.volume = 0.5;
+      audio.play().catch(() => {});
     }
-    audio.volume = 0.5;
-    audio.play().catch(() => {});
     setMusicStarted(true);
   }, []);
 
@@ -67,30 +106,42 @@ export function Scene({ invite }: Props) {
   }, []);
 
   const openEnvelope = useCallback(() => {
-    if (opened) return;
-    setOpened(true);
-    startMusic();
-  }, [opened, startMusic]);
+    setOpened((o) => {
+      if (!o) startMusic();
+      return true;
+    });
+  }, [startMusic]);
 
-  useEffect(() => {
-    if (beat !== "card" || !opened) return;
-    const id = setTimeout(() => setBeat("map"), 7000);
-    return () => clearTimeout(id);
-  }, [beat, opened]);
-
-  const handleArrived = useCallback(() => {
-    setBeat((b) => (b === "map" ? "venue" : b));
+  const handleIntroDone = useCallback(() => {
+    introDoneRef.current = true;
+    setIntroDone(true);
+    setHintVisible(true);
+    // guard against browser scroll restoration leaving us mid-story
+    window.scrollTo(0, 0);
   }, []);
 
+  // The container is always 600vh so scroll progress is never degenerate;
+  // instead, scrolling itself is locked until the intro completes.
+  useEffect(() => {
+    if (introDone) return;
+    // <html> is the actual scroller — locking body alone doesn't stop it.
+    const html = document.documentElement.style;
+    const body = document.body.style;
+    const prevHtml = html.overflow;
+    const prevBody = body.overflow;
+    html.overflow = "hidden";
+    body.overflow = "hidden";
+    window.scrollTo(0, 0);
+    return () => {
+      html.overflow = prevHtml;
+      body.overflow = prevBody;
+    };
+  }, [introDone]);
+
   return (
-    <main className="relative min-h-dvh w-full overflow-hidden bg-bg-beige text-ink-olive-deep">
-      <audio
-        ref={audioRef}
-        src="/perfect.mp3"
-        preload="auto"
-        playsInline
-        // TODO: ensure public/perfect.mp3 exists (Ed Sheeran). Music tap will silently fail otherwise.
-      />
+    <main className="relative bg-bg-beige text-ink-olive-deep">
+      <audio ref={audioRef} src="/perfect.mp3" preload="metadata" playsInline />
+      <div className="grain-overlay" />
 
       <header className="pointer-events-none fixed top-0 inset-x-0 z-20 pt-5">
         <div className="pointer-events-auto mx-auto max-w-[min(92vw,520px)] px-4">
@@ -101,139 +152,105 @@ export function Scene({ invite }: Props) {
         </div>
       </header>
 
-      <section className="relative min-h-dvh w-full grid place-items-center px-4">
-        <AnimatePresence mode="sync">
-          {beat === "card" && (
-            <motion.div
-              key="card"
-              exit={{ opacity: 0, transition: { duration: 0.4 } }}
-              className="absolute inset-0 grid place-items-center px-4"
-            >
-              {/* The invitation — rendered BEHIND the envelope so the envelope
-                  front face masks the lower portion of the card while it's
-                  still small. The card stays at scale 0.4 (just slightly
-                  taller than the envelope's interior) until the envelope is
-                  fully faded, so its bottom never visibly sticks out below
-                  the envelope. Once the envelope is gone, the card grows to
-                  full size, holds, shrinks to the plane footprint. */}
-              {opened && (
-                <div className="absolute inset-0 grid place-items-center pointer-events-none">
-                  <motion.div
-                    initial={{ opacity: 0, scaleX: 0.4, scaleY: 0.4 }}
-                    animate={{
-                      opacity: [0, 1, 1, 1, 1, 0, 0],
-                      scaleX: [0.4, 0.4, 0.4, 1, 1, 0.47, 0.47],
-                      scaleY: [0.4, 0.4, 0.4, 1, 1, 0.353, 0.353],
-                    }}
-                    transition={{
-                      // wall-clock from seal-tap:
-                      // 0, 0.95s, 2.4s, 3.8s, 5.0s, 5.6s, 7.0s
-                      duration: 7,
-                      times: [0, 0.136, 0.343, 0.543, 0.714, 0.8, 1],
-                      ease: [0.4, 0, 0.2, 1],
-                    }}
-                  >
-                    <InvitationCard visible />
-                  </motion.div>
-                </div>
-              )}
+      <div ref={containerRef} className="relative h-[600vh]">
+        {/* fixed 3D layer */}
+        <div className="fixed inset-0">
+          <Experience
+            label={invite.label}
+            opened={opened}
+            scrollProgress={scrollYProgress}
+            onTapSeal={openEnvelope}
+            onIntroDone={handleIntroDone}
+          />
+        </div>
 
-              {/* Envelope — sits on top of the card so its front face occludes
-                  the still-inside portion of the card while it emerges. Fades
-                  itself out via its own internal animation. */}
-              <div className="absolute inset-0 grid place-items-center [overflow:visible]">
-                <Envelope label={invite.label} opened={opened} onTapSeal={openEnvelope} />
-              </div>
+        {/* tap hint (pre-open) */}
+        {!opened && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.6 }}
+            transition={{ delay: 1 }}
+            className="fixed bottom-[12vh] inset-x-0 text-center text-xs uppercase tracking-[0.25em] pointer-events-none z-10"
+          >
+            tap the seal
+          </motion.p>
+        )}
 
-              {opened && (
-                <>
-                  {/* Paper shell — fixed 160x160 box. Fades in as the card
-                      finishes shrinking (its scaled-down size lands on the
-                      shell's footprint), then clip-path morphs rect → plane
-                      silhouette. */}
-                  <div className="absolute inset-0 grid place-items-center pointer-events-none">
-                    <motion.div
-                      initial={{
-                        opacity: 0,
-                        clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                      }}
-                      animate={{
-                        opacity: [0, 0, 1, 1, 1, 0, 0],
-                        clipPath: [
-                          "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                          "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                          "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-                          "polygon(45% 25%, 55% 7%, 70% 75%, 5% 92%)",
-                          "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
-                          "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
-                          "polygon(90% 50%, 10% 15%, 40% 50%, 10% 85%)",
-                        ],
-                      }}
-                      transition={{
-                        // wall-clock: 0, 5.0s, 5.6s, 5.8s, 6.0s, 6.4s, 7.0s
-                        duration: 7,
-                        times: [0, 0.714, 0.8, 0.829, 0.857, 0.914, 1],
-                        ease: [0.4, 0, 0.2, 1],
-                      }}
-                      className="w-40 h-40 bg-bg-beige-warm shadow-[0_18px_40px_rgba(47,58,34,0.18)]"
-                    />
-                  </div>
+        {/* scroll hint (post-intro, top of scroll) */}
+        {hintVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed bottom-[7vh] inset-x-0 flex flex-col items-center gap-2 pointer-events-none z-10"
+          >
+            <span className="text-[10px] uppercase tracking-[0.3em] text-accent-olive">scroll</span>
+            <span className="scroll-hint-line" />
+          </motion.div>
+        )}
 
-                  {/* PaperPlane SVG — crossfades in over the folded silhouette
-                      then flies off. Same 160x160 box as the shell. */}
-                  <div className="absolute inset-0 grid place-items-center pointer-events-none">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 1, x: 0, y: 0, rotate: 0 }}
-                      animate={{
-                        opacity: [0, 0, 1, 1],
-                        scale: [1, 1, 1, 0.4],
-                        x: [0, 0, 0, "60vw"],
-                        y: [0, 0, 0, "-50vh"],
-                        rotate: [0, 0, 0, -40],
-                      }}
-                      transition={{
-                        // wall-clock: 0, 6.0s, 6.4s, 7.0s
-                        duration: 7,
-                        times: [0, 0.857, 0.914, 1],
-                        ease: [0.4, 0, 0.2, 1],
-                      }}
-                      className="w-40 h-40"
-                    >
-                      <PaperPlane className="w-full h-full" />
-                    </motion.div>
-                  </div>
-                </>
-              )}
-            </motion.div>
-          )}
+        {/* scroll-synced captions */}
+        <motion.div
+          style={{ opacity: photosTextO }}
+          className="fixed inset-x-0 top-[10vh] text-center pointer-events-none z-10 px-4"
+        >
+          <h1 className="font-display text-[clamp(2.2rem,9vw,4.5rem)] leading-tight">
+            Suzane <span className="opacity-60">&amp;</span> Amine
+          </h1>
+          <p className="mt-1 text-[clamp(0.6rem,2.4vw,0.8rem)] uppercase tracking-[0.3em] text-accent-olive">
+            are getting married
+          </p>
+        </motion.div>
 
-          {beat === "map" && (
-            <motion.div
-              key="map"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.5 } }}
-              transition={{ duration: 0.6 }}
-              className="w-full"
-            >
-              <WorldMap visible onArrived={handleArrived} />
-            </motion.div>
-          )}
+        <motion.div
+          style={{ opacity: flightTextO }}
+          className="fixed inset-x-0 top-[12vh] text-center pointer-events-none z-10 px-4"
+        >
+          <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
+            From Vancouver, with love
+          </p>
+        </motion.div>
 
-          {(beat === "venue" || beat === "rsvp" || beat === "thanks") && (
-            <motion.div
-              key="venue"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
-              className="w-full"
-            >
-              <VenueCard visible onRsvpClick={() => setBeat("rsvp")} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </section>
+        <motion.div
+          style={{ opacity: landTextO }}
+          className="fixed inset-x-0 top-[12vh] text-center pointer-events-none z-10 px-4"
+        >
+          <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
+            First stop — Suzane&apos;s home
+          </p>
+        </motion.div>
+
+        <motion.div
+          style={{ opacity: driveTextO }}
+          className="fixed inset-x-0 top-[12vh] text-center pointer-events-none z-10 px-4"
+        >
+          <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
+            Then together, by wedding car
+          </p>
+        </motion.div>
+
+        <motion.div
+          style={{ opacity: arriveTextO }}
+          className="fixed inset-x-0 top-[12vh] text-center pointer-events-none z-10 px-4"
+        >
+          <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
+            Nahr El Kalb, Lebanon
+          </p>
+          <p className="mt-1 text-[clamp(0.6rem,2.4vw,0.8rem)] uppercase tracking-[0.25em] text-accent-olive">
+            August 29, 2026
+          </p>
+        </motion.div>
+
+        {/* final DOM section — last 100vh of the container. Mounted only
+            after the intro: before that the container is viewport-sized,
+            so this section would cover (and block taps on) the envelope. */}
+        {introDone && (
+          <div className="absolute inset-x-0 bottom-0 h-screen z-10">
+            <div className="h-full w-full bg-gradient-to-b from-transparent via-bg-beige/80 to-bg-beige grid place-items-center px-4">
+              <VenueCard visible={venueSeen} onRsvpClick={() => setBeat("rsvp")} />
+            </div>
+          </div>
+        )}
+      </div>
 
       <RsvpForm
         visible={beat === "rsvp"}
@@ -241,7 +258,6 @@ export function Scene({ invite }: Props) {
         max={invite.max}
         onSubmitted={() => setBeat("thanks")}
       />
-
       <ThankYou visible={beat === "thanks"} />
     </main>
   );

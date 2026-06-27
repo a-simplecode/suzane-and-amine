@@ -14,7 +14,7 @@ export function ThankYou({ visible }: Props) {
       initial={{ opacity: 0 }}
       animate={visible ? { opacity: 1 } : { opacity: 0 }}
       transition={{ duration: 0.8 }}
-      className={`absolute inset-0 z-40 bg-bg-beige text-ink-olive-deep flex flex-col items-center justify-center px-6 text-center ${visible ? "" : "pointer-events-none"}`}
+      className={`fixed inset-0 z-40 bg-bg-beige text-ink-olive-deep flex flex-col items-center justify-center px-6 text-center ${visible ? "" : "pointer-events-none"}`}
       aria-hidden={!visible}
     >
       <div className="flex items-center gap-3 font-display text-3xl">

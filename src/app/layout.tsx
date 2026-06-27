@@ -52,7 +52,6 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://www.google.com" />
         <link rel="dns-prefetch" href="https://maps.google.com" />
-        <link rel="preload" as="audio" href="/perfect.mp3" />
       </head>
       <body className="min-h-full">{children}</body>
     </html>
