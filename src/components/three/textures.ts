@@ -344,3 +344,44 @@ export function makeMapTexture(): THREE.CanvasTexture {
   ctx.globalAlpha = 1;
   return asTexture(canvas);
 }
+
+/**
+ * Wax-seal face: a single-line "S & A" monogram in the display serif over a
+ * stamped olive disc, with a fine gold ring. Returned texture is used as the
+ * seal puck's color map; the ring geometry is drawn in 3D separately.
+ */
+export function makeSealTexture(): THREE.CanvasTexture {
+  const S = 512;
+  const { canvas, ctx } = makeCanvas(S, S);
+  const tex = asTexture(canvas);
+
+  const draw = () => {
+    const fam = displayFontFamily();
+    ctx.clearRect(0, 0, S, S);
+    // wax disc
+    const grad = ctx.createRadialGradient(S / 2, S * 0.42, 20, S / 2, S / 2, S / 2);
+    grad.addColorStop(0, "#7c8c56");
+    grad.addColorStop(1, COL.olive);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(S / 2, S / 2, S / 2 - 8, 0, Math.PI * 2);
+    ctx.fill();
+    // pressed inner rim
+    ctx.strokeStyle = "rgba(47,58,34,0.35)";
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.arc(S / 2, S / 2, S / 2 - 44, 0, Math.PI * 2);
+    ctx.stroke();
+    // monogram
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = COL.beige;
+    ctx.font = `600 230px ${fam}`;
+    ctx.fillText("S & A", S / 2, S / 2 + 12);
+    tex.needsUpdate = true;
+  };
+
+  draw();
+  document.fonts.ready.then(draw);
+  return tex;
+}

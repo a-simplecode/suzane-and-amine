@@ -5,7 +5,8 @@ import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { RefObject } from "react";
 import { easeOut3, seg, smooth, type Timeline } from "./timeline";
-import { makeEnvelopeTexture, makePaperTexture } from "./textures";
+import { makeEnvelopeTexture, makePaperTexture, makeSealTexture } from "./textures";
+import { PALETTE } from "@/lib/palette";
 
 const W = 3.6;
 const H = 2.16;
@@ -38,6 +39,7 @@ export function Envelope3D({ tl, label, onTapSeal }: Props) {
 
   const envTex = useMemo(() => makeEnvelopeTexture(label), [label]);
   const paperTex = useMemo(() => makePaperTexture(), []);
+  const sealTex = useMemo(() => makeSealTexture(), []);
 
   const flapShape = useMemo(() => {
     const s = new THREE.Shape();
@@ -151,13 +153,20 @@ export function Envelope3D({ tl, label, onTapSeal }: Props) {
       </sprite>
       {/* wax seal (tap target) */}
       <group ref={seal} position={[0, -0.1, 0.06]} onPointerDown={onTapSeal}>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
+        {/* puck body */}
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
           <cylinderGeometry args={[0.42, 0.45, 0.07, 48]} />
-          <meshStandardMaterial color="#6b7a4b" roughness={0.55} />
+          <meshStandardMaterial color={PALETTE.olive} roughness={0.5} />
         </mesh>
+        {/* monogram face, just proud of the puck front (+Z) */}
+        <mesh position={[0, 0, 0.036]}>
+          <circleGeometry args={[0.42, 48]} />
+          <meshStandardMaterial map={sealTex} transparent roughness={0.5} depthWrite={false} />
+        </mesh>
+        {/* fine gold ring */}
         <mesh position={[0, 0, 0.04]}>
-          <torusGeometry args={[0.3, 0.012, 8, 48]} />
-          <meshStandardMaterial color="#f1e9da" roughness={0.6} />
+          <torusGeometry args={[0.34, 0.014, 12, 48]} />
+          <meshStandardMaterial color={PALETTE.gold} metalness={0.5} roughness={0.35} />
         </mesh>
       </group>
       {/* wax shards */}
