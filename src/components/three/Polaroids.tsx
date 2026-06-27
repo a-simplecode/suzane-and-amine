@@ -13,7 +13,8 @@ const SPAN = BEATS.photos[1] - BEATS.photos[0];
 const SLOT = SPAN / PHOTOS.length;
 const SLOTS = PHOTOS.map((_, i) => {
   const core = BEATS.photos[0] + i * SLOT;
-  return { start: core - SLOT * 0.3, end: core + SLOT * 1.3 };
+  // small overlap so neighbours crossfade briefly, but mostly one at a time
+  return { start: core - SLOT * 0.08, end: core + SLOT * 1.08 };
 });
 
 export function Polaroids({ tl }: { tl: RefObject<Timeline> }) {
@@ -67,16 +68,17 @@ export function Polaroids({ tl }: { tl: RefObject<Timeline> }) {
       if (!slot || !rig) return;
       // tt: 0..1 across this photo's padded window
       const tt = seg(t.p, slot.start, slot.end);
-      // crossfade envelope: fade in over first 22%, out over last 22%
+      // crossfade envelope: fade in over first 16%, out over last 16%
       const fade =
-        smooth(Math.min(1, tt / 0.22)) * smooth(Math.min(1, (1 - tt) / 0.22));
+        smooth(Math.min(1, tt / 0.16)) * smooth(Math.min(1, (1 - tt) / 0.16));
       child.visible = fade > 0.001;
       if (!child.visible) return;
 
-      // slow cinematic push-in + lateral Ken Burns drift
-      const push = 1 + smooth(tt) * 0.09;
+      // slow cinematic push-in + lateral Ken Burns drift (gentle so the
+      // whole frame stays visible — never crops past the edges)
+      const push = 1 + smooth(tt) * 0.04;
       child.scale.setScalar(push);
-      child.position.set(rig.dir * (tt - 0.5) * 0.45, 0.1 + (tt - 0.5) * 0.12, 3.3);
+      child.position.set(rig.dir * (tt - 0.5) * 0.25, 0.1 + (tt - 0.5) * 0.08, 3.3);
       child.rotation.z = rig.rot * (1 - smooth(tt) * 0.5);
 
       child.traverse((n) => {
@@ -90,8 +92,9 @@ export function Polaroids({ tl }: { tl: RefObject<Timeline> }) {
     <group ref={root} visible={false}>
       {PHOTOS.map((photo, i) => {
         const landscape = photo.width >= photo.height;
-        // big, near-full-frame hero stills
-        const w = landscape ? 5.0 : 3.4;
+        // sized to sit fully inside a portrait phone frame (no edge crop):
+        // landscape photos are limited by the phone's narrow width.
+        const w = landscape ? 2.7 : 2.1;
         const h = (w * photo.height) / photo.width;
         return (
           <group key={photo.src} visible={false}>

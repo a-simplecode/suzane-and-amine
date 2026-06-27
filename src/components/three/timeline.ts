@@ -18,16 +18,17 @@ export const createTimeline = (): Timeline => ({ p: 0, intro: 0, vel: 0, opened:
 // Scroll beats (fractions of total scroll). Beat 1 (seal/intro) is
 // time-driven, not scroll-driven, so it has no range here.
 export const BEATS = {
-  photos: [0.03, 0.18],
-  fold: [0.18, 0.3],
-  flight: [0.3, 0.56],
+  // photos own a wide slice so the hero stills linger instead of flicking by
+  photos: [0.03, 0.32],
+  fold: [0.32, 0.42],
+  flight: [0.42, 0.64],
   /** plane descends and lands at Suzane's home */
-  land: [0.56, 0.66],
+  land: [0.64, 0.72],
   /** wedding car drives the coastal road home → venue */
-  drive: [0.66, 0.8],
+  drive: [0.72, 0.83],
   /** venue pin drop + ring at L'Heritage */
-  arrive: [0.8, 0.88],
-  outro: [0.88, 1.0],
+  arrive: [0.83, 0.9],
+  outro: [0.9, 1.0],
 } as const;
 
 /** Normalized position of p inside [a,b], clamped to 0..1. */

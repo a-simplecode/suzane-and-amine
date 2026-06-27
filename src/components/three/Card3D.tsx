@@ -22,8 +22,26 @@ export function Card3D({ tl }: { tl: RefObject<Timeline> }) {
     if (!t || !g) return;
 
     const foldT = seg(t.p, BEATS.fold[0], BEATS.fold[1]);
-    g.visible = t.opened && foldT < 0.5;
+    // The card owns the intro reveal, then fades out so the hero photos own
+    // the frame during the photos beat, then swoops back in for the fold.
+    let alpha = 1;
+    if (t.intro >= 1) {
+      alpha =
+        t.p < BEATS.fold[0]
+          ? 1 - smooth(seg(t.p, BEATS.photos[0], BEATS.photos[0] + 0.04))
+          : smooth(seg(foldT, 0, 0.18));
+    }
+    g.visible = t.opened && foldT < 0.5 && alpha > 0.01;
     if (!g.visible) return;
+
+    g.traverse((n) => {
+      const mesh = n as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const mat = mesh.material;
+      (Array.isArray(mat) ? mat : [mat]).forEach((m) => {
+        (m as THREE.MeshStandardMaterial).opacity = alpha;
+      });
+    });
 
     if (t.intro < 1) {
       // emerge from the envelope, then settle to center at full size
@@ -52,12 +70,12 @@ export function Card3D({ tl }: { tl: RefObject<Timeline> }) {
     <group ref={root} visible={false}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={[CARD_W, CARD_H, 0.03]} />
-        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-0" />
-        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-1" />
-        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-2" />
-        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-3" />
-        <meshStandardMaterial map={cardTex} roughness={0.85} attach="material-4" />
-        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} attach="material-5" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} transparent attach="material-0" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} transparent attach="material-1" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} transparent attach="material-2" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} transparent attach="material-3" />
+        <meshStandardMaterial map={cardTex} roughness={0.85} transparent attach="material-4" />
+        <meshStandardMaterial color="#e8dfc9" map={paperTex} roughness={0.9} transparent attach="material-5" />
       </mesh>
     </group>
   );
