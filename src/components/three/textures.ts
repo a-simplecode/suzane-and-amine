@@ -73,8 +73,12 @@ export function makeCardTexture(): THREE.CanvasTexture {
     ctx.font = "500 34px Inter, system-ui, sans-serif";
     const spaced = (s: string) => s.split("").join("  ");
     ctx.fillText(spaced("ARE GETTING MARRIED"), W / 2, 640);
-    ctx.fillStyle = COL.olive;
+    ctx.fillStyle = COL.gold;
     ctx.fillRect(W / 2 - 80, 720, 160, 2);
+    ctx.beginPath();
+    ctx.arc(W / 2 - 96, 721, 4, 0, Math.PI * 2);
+    ctx.arc(W / 2 + 96, 721, 4, 0, Math.PI * 2);
+    ctx.fill();
     ctx.fillStyle = COL.ink;
     ctx.font = `500 72px ${display}`;
     ctx.fillText("Saturday", W / 2, 850);
@@ -322,6 +326,19 @@ export function makeMapTexture(): THREE.CanvasTexture {
   ctx.globalAlpha = 0.85;
   ctx.font = "500 16px Georgia, serif";
   ctx.textAlign = "left";
+  const cityDot = (lon: number, lat: number) => {
+    const x = ((lon + 180) / 360) * W;
+    const y = ((90 - lat) / 180) * H;
+    ctx.save();
+    ctx.fillStyle = COL.gold;
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  cityDot(-123.1, 49.2);
+  cityDot(35.5, 33.9);
   label("Vancouver", -123.1, 49.2, 9, -7);
   label("Beirut", 35.5, 33.9, 10, 5);
   ctx.globalAlpha = 1;
