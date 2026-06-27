@@ -22,7 +22,7 @@ export function VenueCard({ visible, onRsvpClick }: Props) {
       initial={{ opacity: 0, y: 28 }}
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
       transition={{ duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
-      className="w-[min(90vw,420px)] mx-auto rounded-xl bg-bg-beige-warm shadow-[0_12px_36px_rgba(47,58,34,0.18)] px-6 py-7 text-ink-olive-deep"
+      className="w-[min(90vw,420px)] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain mx-auto rounded-xl bg-bg-beige-warm shadow-[0_12px_36px_rgba(47,58,34,0.18)] px-5 py-6 text-ink-olive-deep"
     >
       <div className="text-center">
         <h2 className="font-display text-3xl">L&apos;Heritage Venue</h2>
@@ -31,13 +31,13 @@ export function VenueCard({ visible, onRsvpClick }: Props) {
         </p>
       </div>
 
-      <ul className="mt-6 flex flex-col gap-3 text-sm">
+      <ul className="mt-5 flex flex-col gap-2.5 text-sm">
         <Row time="7:00 PM" label="Mass (Arabic)" />
         <Row time="8:00 PM" label="Welcome drink" />
         <Row time="8:30 PM" label="Dinner & dancing" />
       </ul>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 text-[11px] uppercase tracking-[0.18em] text-accent-olive">
+      <div className="mt-4 grid grid-cols-2 gap-3 text-[11px] uppercase tracking-[0.18em] text-accent-olive">
         <div className="rounded bg-bg-beige/60 px-3 py-2 text-center">
           Dress code: formal
         </div>
@@ -46,7 +46,7 @@ export function VenueCard({ visible, onRsvpClick }: Props) {
         </div>
       </div>
 
-      <div className="mt-5 h-36 w-full rounded-lg overflow-hidden bg-bg-beige/70 border border-accent-olive/15">
+      <div className="mt-4 h-[clamp(7rem,22vh,9rem)] w-full rounded-lg overflow-hidden bg-bg-beige/70 border border-accent-olive/15">
         {mapReady ? (
           <iframe
             src="https://www.google.com/maps?q=L%27Heritage%20Venue%20Nahr%20El%20Kalb%20Lebanon&output=embed"
@@ -65,7 +65,7 @@ export function VenueCard({ visible, onRsvpClick }: Props) {
       <button
         type="button"
         onClick={onRsvpClick}
-        className="mt-6 w-full rounded-full bg-accent-olive py-3 text-bg-beige font-display text-lg tracking-wide active:scale-[0.98] transition"
+        className="mt-5 w-full rounded-full bg-accent-olive py-3 text-bg-beige font-display text-lg tracking-wide active:scale-[0.98] transition"
       >
         RSVP
       </button>

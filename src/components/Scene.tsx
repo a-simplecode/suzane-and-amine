@@ -150,11 +150,11 @@ function FullScene({ invite }: { invite: Invite }) {
       <audio ref={audioRef} src="/perfect.mp3" preload="metadata" playsInline />
       <div className="grain-overlay" />
 
-      <header className="pointer-events-none fixed top-0 inset-x-0 z-20 pt-5">
+      <header className="pointer-events-none fixed top-0 inset-x-0 z-20 pt-[max(20px,env(safe-area-inset-top))]">
         <div className="pointer-events-auto mx-auto max-w-[min(92vw,520px)] px-4">
           <Countdown mode="corner" />
         </div>
-        <div className="pointer-events-auto absolute top-5 right-5">
+        <div className="pointer-events-auto absolute top-[max(20px,env(safe-area-inset-top))] right-[max(20px,env(safe-area-inset-right))]">
           <MusicToggle visible={musicStarted} muted={muted} onToggle={toggleMute} />
         </div>
       </header>
@@ -177,7 +177,7 @@ function FullScene({ invite }: { invite: Invite }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.6 }}
             transition={{ delay: 1 }}
-            className="fixed bottom-[12vh] inset-x-0 text-center text-xs uppercase tracking-[0.25em] pointer-events-none z-10"
+            className="fixed bottom-[calc(env(safe-area-inset-bottom)+12vh)] inset-x-0 text-center text-xs uppercase tracking-[0.25em] pointer-events-none z-10"
           >
             tap the seal
           </motion.p>
@@ -188,7 +188,7 @@ function FullScene({ invite }: { invite: Invite }) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed bottom-[7vh] inset-x-0 flex flex-col items-center gap-2 pointer-events-none z-10"
+            className="fixed bottom-[calc(env(safe-area-inset-bottom)+5vh)] inset-x-0 flex flex-col items-center gap-2 pointer-events-none z-10"
           >
             <span className="text-[10px] uppercase tracking-[0.3em] text-accent-gold">scroll</span>
             <span className="scroll-hint-line" />
@@ -198,7 +198,7 @@ function FullScene({ invite }: { invite: Invite }) {
         {/* scroll-synced captions */}
         <motion.div
           style={{ opacity: photosTextO }}
-          className="fixed inset-x-0 top-[10vh] text-center pointer-events-none z-10 px-4"
+          className="fixed inset-x-0 top-[calc(env(safe-area-inset-top)+5.5rem)] text-center pointer-events-none z-10 px-4"
         >
           <h1 className="font-display text-[clamp(2.2rem,9vw,4.5rem)] leading-tight">
             Suzane <span className="opacity-60">&amp;</span> Amine
@@ -210,7 +210,7 @@ function FullScene({ invite }: { invite: Invite }) {
 
         <motion.div
           style={{ opacity: flightTextO }}
-          className="fixed inset-x-0 top-[12vh] text-center pointer-events-none z-10 px-4"
+          className="fixed inset-x-0 top-[calc(env(safe-area-inset-top)+5.5rem)] text-center pointer-events-none z-10 px-4"
         >
           <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
             From Vancouver, with love
@@ -219,7 +219,7 @@ function FullScene({ invite }: { invite: Invite }) {
 
         <motion.div
           style={{ opacity: landTextO }}
-          className="fixed inset-x-0 top-[12vh] text-center pointer-events-none z-10 px-4"
+          className="fixed inset-x-0 top-[calc(env(safe-area-inset-top)+5.5rem)] text-center pointer-events-none z-10 px-4"
         >
           <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
             First stop — Suzane&apos;s home
@@ -228,7 +228,7 @@ function FullScene({ invite }: { invite: Invite }) {
 
         <motion.div
           style={{ opacity: driveTextO }}
-          className="fixed inset-x-0 top-[12vh] text-center pointer-events-none z-10 px-4"
+          className="fixed inset-x-0 top-[calc(env(safe-area-inset-top)+5.5rem)] text-center pointer-events-none z-10 px-4"
         >
           <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
             Then together, by wedding car
@@ -237,7 +237,7 @@ function FullScene({ invite }: { invite: Invite }) {
 
         <motion.div
           style={{ opacity: arriveTextO }}
-          className="fixed inset-x-0 top-[12vh] text-center pointer-events-none z-10 px-4"
+          className="fixed inset-x-0 top-[calc(env(safe-area-inset-top)+5.5rem)] text-center pointer-events-none z-10 px-4"
         >
           <p className="font-display text-[clamp(1.4rem,5vw,2.4rem)]">
             Nahr El Kalb, Lebanon
@@ -251,8 +251,8 @@ function FullScene({ invite }: { invite: Invite }) {
             after the intro: before that the container is viewport-sized,
             so this section would cover (and block taps on) the envelope. */}
         {introDone && (
-          <div className="absolute inset-x-0 bottom-0 h-screen z-10">
-            <div className="h-full w-full bg-gradient-to-b from-transparent via-bg-beige/80 to-bg-beige grid place-items-center px-4">
+          <div className="absolute inset-x-0 bottom-0 min-h-dvh z-10">
+            <div className="min-h-dvh w-full bg-gradient-to-b from-transparent via-bg-beige/80 to-bg-beige grid place-items-center px-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(20px,env(safe-area-inset-bottom))]">
               <VenueCard visible={venueSeen} onRsvpClick={() => setBeat("rsvp")} />
             </div>
           </div>

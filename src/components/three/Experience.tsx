@@ -25,6 +25,12 @@ type Props = {
 
 const INTRO_SECONDS = 2.5;
 
+// Phones cap device-pixel-ratio lower than desktop to protect frame rate.
+// This module only loads client-side (Experience is dynamic, ssr:false).
+const IS_TOUCH =
+  typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+const DPR: [number, number] = IS_TOUCH ? [1, 1.3] : [1, 1.5];
+
 function Driver({
   timeline,
   opened,
@@ -78,7 +84,7 @@ export function Experience({ label, opened, scrollProgress, onTapSeal, onIntroDo
 
   return (
     <Canvas
-      dpr={[1, 1.5]}
+      dpr={DPR}
       camera={{ fov: 42, position: [0, 0.25, 7] }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {

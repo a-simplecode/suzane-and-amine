@@ -7,6 +7,12 @@ import type { RefObject } from "react";
 import * as THREE from "three";
 import { BEATS, seg, smooth, type Timeline } from "./timeline";
 
+// Lighter shadow map on phones to protect frame rate.
+const SHADOW_RES =
+  typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
+    ? 256
+    : 512;
+
 export function ContactGroundShadows({ tl }: { tl: RefObject<Timeline> }) {
   const group = useRef<THREE.Group>(null);
   useFrame(() => {
@@ -24,7 +30,7 @@ export function ContactGroundShadows({ tl }: { tl: RefObject<Timeline> }) {
         scale={12}
         blur={2.4}
         far={6}
-        resolution={512}
+        resolution={SHADOW_RES}
         color="#2f3a22"
         frames={1}
       />

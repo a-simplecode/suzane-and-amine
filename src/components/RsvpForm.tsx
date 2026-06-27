@@ -79,7 +79,7 @@ export function RsvpForm({ visible, slug, max, onSubmitted }: Props) {
       initial={{ y: "100%" }}
       animate={visible ? { y: 0 } : { y: "100%" }}
       transition={{ duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
-      className={`fixed inset-x-0 bottom-0 z-30 bg-bg-beige-warm rounded-t-3xl shadow-[0_-14px_40px_rgba(47,58,34,0.18)] px-6 pt-7 pb-[max(28px,env(safe-area-inset-bottom))] ${visible ? "" : "pointer-events-none"}`}
+      className={`fixed inset-x-0 bottom-0 z-30 max-h-[90dvh] overflow-y-auto overscroll-contain bg-bg-beige-warm rounded-t-3xl shadow-[0_-14px_40px_rgba(47,58,34,0.18)] px-6 pt-7 pb-[max(28px,env(safe-area-inset-bottom))] ${visible ? "" : "pointer-events-none"}`}
       role="dialog"
       aria-hidden={!visible}
       aria-label="RSVP form"

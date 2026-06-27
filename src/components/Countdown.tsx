@@ -73,7 +73,7 @@ export function Countdown({ mode = "corner", className }: Props) {
     }
     return (
       <div className={`${className ?? ""} text-center leading-tight`}>
-        <div className="font-display text-lg sm:text-xl text-ink-olive-deep">
+        <div className="font-display text-lg sm:text-xl text-bg-beige">
           {WEDDING_LABEL}
         </div>
         <div className="mt-1 text-sm sm:text-base tabular-nums opacity-75">

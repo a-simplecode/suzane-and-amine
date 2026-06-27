@@ -35,11 +35,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F1E9DA",
+  themeColor: "#232a18",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // expose the notch / home-indicator insets so env(safe-area-inset-*) works
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
