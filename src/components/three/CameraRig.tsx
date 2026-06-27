@@ -93,7 +93,7 @@ export function CameraRig({ tl }: { tl: RefObject<Timeline> }) {
       tmp.lk.copy(VENUE_PIN);
     }
 
-    const k = 1 - Math.exp(-4.5 * dt);
+    const k = 1 - Math.exp(-3.6 * dt);
     camera.position.lerp(tmp.pos, k);
     look.current.lerp(tmp.lk, k);
     camera.lookAt(look.current);

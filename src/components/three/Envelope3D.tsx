@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { RefObject } from "react";
+import { Float } from "@react-three/drei";
 import { easeOut3, seg, smooth, type Timeline } from "./timeline";
 import { makeEnvelopeTexture, makePaperTexture, makeSealTexture } from "./textures";
 import { PALETTE } from "@/lib/palette";
@@ -122,7 +123,8 @@ export function Envelope3D({ tl, label, onTapSeal }: Props) {
   };
 
   return (
-    <group ref={root}>
+    <Float speed={1.2} rotationIntensity={0.12} floatIntensity={0.25}>
+      <group ref={root}>
       {/* envelope body — thin box so edges catch light; front face textured */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[W, H, 0.06]} />
@@ -178,6 +180,7 @@ export function Envelope3D({ tl, label, onTapSeal }: Props) {
           </mesh>
         ))}
       </group>
-    </group>
+      </group>
+    </Float>
   );
 }

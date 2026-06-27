@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Invite } from "@/lib/invites";
 import { detectTier, type Tier } from "@/lib/quality";
+import { BEATS } from "./three/timeline";
 import { Countdown } from "./Countdown";
 import { FallbackScene } from "./FallbackScene";
 import { MusicToggle } from "./MusicToggle";
@@ -81,11 +82,17 @@ function FullScene({ invite }: { invite: Invite }) {
     if (v > 0.88) setVenueSeen(true);
   });
 
-  const photosTextO = useTransform(scrollYProgress, [0.04, 0.08, 0.15, 0.18], [0, 1, 1, 0]);
-  const flightTextO = useTransform(scrollYProgress, [0.32, 0.38, 0.5, 0.56], [0, 1, 1, 0]);
-  const landTextO = useTransform(scrollYProgress, [0.57, 0.61, 0.65, 0.68], [0, 1, 1, 0]);
-  const driveTextO = useTransform(scrollYProgress, [0.69, 0.73, 0.77, 0.8], [0, 1, 1, 0]);
-  const arriveTextO = useTransform(scrollYProgress, [0.81, 0.85, 0.9, 0.94], [0, 1, 1, 0]);
+  // Build a [fadeInStart, fadeInEnd, fadeOutStart, fadeOutEnd] window from a
+  // beat range so captions can never desync from timeline.ts BEATS.
+  const win = (a: number, b: number): [number, number, number, number] => {
+    const span = b - a;
+    return [a + span * 0.05, a + span * 0.3, b - span * 0.25, b + span * 0.05];
+  };
+  const photosTextO = useTransform(scrollYProgress, win(BEATS.photos[0], BEATS.photos[1]), [0, 1, 1, 0]);
+  const flightTextO = useTransform(scrollYProgress, win(BEATS.flight[0], BEATS.flight[1]), [0, 1, 1, 0]);
+  const landTextO = useTransform(scrollYProgress, win(BEATS.land[0], BEATS.land[1]), [0, 1, 1, 0]);
+  const driveTextO = useTransform(scrollYProgress, win(BEATS.drive[0], BEATS.drive[1]), [0, 1, 1, 0]);
+  const arriveTextO = useTransform(scrollYProgress, win(BEATS.arrive[0], BEATS.arrive[1]), [0, 1, 1, 0]);
 
   const startMusic = useCallback(() => {
     const audio = audioRef.current;
