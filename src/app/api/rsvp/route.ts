@@ -43,11 +43,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, queued: true });
   }
 
+  // RSVP_TO_EMAIL may be a comma-separated list of recipients.
+  const to = (process.env.RSVP_TO_EMAIL ?? "amine@quandri.io")
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+
   try {
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
       from: process.env.RSVP_FROM_EMAIL ?? "onboarding@resend.dev",
-      to: process.env.RSVP_TO_EMAIL ?? "amine@quandri.io",
+      to,
       subject,
       text,
     });
