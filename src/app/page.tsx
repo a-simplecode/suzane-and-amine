@@ -1,25 +1,31 @@
+import type { Metadata } from "next";
+import { EVENT } from "@/data/event";
 import { Hero } from "@/components/sections/Hero";
 import { Story } from "@/components/sections/Story";
-import { Journey } from "@/components/sections/Journey";
-import { SaveTheDate } from "@/components/sections/SaveTheDate";
-import { Schedule } from "@/components/sections/Schedule";
-import { Venue } from "@/components/sections/Venue";
-import { Details } from "@/components/sections/Details";
+import { InvitationCards } from "@/components/sections/InvitationCards";
+import { JourneyMap } from "@/components/sections/JourneyMap";
+import { Countdown } from "@/components/sections/Countdown";
 import { Rsvp } from "@/components/sections/Rsvp";
-import { Footer } from "@/components/sections/Footer";
+import { Closing } from "@/components/sections/Closing";
+
+const title = `${EVENT.coupleNames[0]} & ${EVENT.coupleNames[1]} · Two places, one love`;
+
+export const metadata: Metadata = {
+  title,
+  description: `Two places. One love. One forever. Celebrate the wedding of ${EVENT.coupleNames[0]} & ${EVENT.coupleNames[1]} — Vancouver to Beirut, ${EVENT.dateLabel}.`,
+  openGraph: { title, type: "website" },
+};
 
 export default function Page() {
   return (
     <main>
       <Hero />
       <Story />
-      <Journey />
-      <SaveTheDate />
-      <Schedule />
-      <Venue />
-      <Details />
+      <InvitationCards />
+      <JourneyMap />
+      <Countdown />
       <Rsvp />
-      <Footer />
+      <Closing />
     </main>
   );
 }
