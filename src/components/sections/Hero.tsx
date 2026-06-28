@@ -1,13 +1,19 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { EVENT } from "@/data/event";
 import { Sprig } from "@/components/botanicals/Sprig";
+import { Parallax } from "@/components/motion/Parallax";
 
 export function Hero() {
+  const reduced = useReducedMotion();
   return (
     <section className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 text-center">
-      <Sprig draw className="absolute left-2 top-10 w-28 opacity-70 sm:w-40" />
-      <Sprig draw flip className="absolute right-2 top-16 w-28 opacity-70 sm:w-40" />
+      <Parallax speed={reduced ? 0 : 0.25} className="absolute left-2 top-10 w-28 opacity-70 sm:w-40">
+        <Sprig draw={!reduced} />
+      </Parallax>
+      <Parallax speed={reduced ? 0 : 0.18} className="absolute right-2 top-16 w-28 opacity-70 sm:w-40">
+        <Sprig draw={!reduced} flip />
+      </Parallax>
 
       <motion.p
         className="mb-6 text-sm uppercase tracking-[0.4em] text-deepsage"
@@ -41,8 +47,12 @@ export function Hero() {
       <motion.div
         className="absolute bottom-8 flex flex-col items-center text-deepsage"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1, y: [0, 8, 0] }}
-        transition={{ opacity: { delay: 1.6 }, y: { repeat: Infinity, duration: 1.8 } }}
+        animate={reduced ? { opacity: 1 } : { opacity: 1, y: [0, 8, 0] }}
+        transition={
+          reduced
+            ? { opacity: { delay: 1.6 } }
+            : { opacity: { delay: 1.6 }, y: { repeat: Infinity, duration: 1.8 } }
+        }
       >
         <span className="text-xs uppercase tracking-widest">Scroll</span>
         <span aria-hidden>↓</span>

@@ -3,12 +3,6 @@ import { EVENT } from "@/data/event";
 export const MAX_NAME_LENGTH = 100;
 export const MAX_MESSAGE_LENGTH = 500;
 
-export type RsvpInput = {
-  headcount: number;
-  names: string[];
-  message: string;
-};
-
 export type Rsvp = {
   headcount: number;
   names: string[];
