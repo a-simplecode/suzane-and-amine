@@ -16,33 +16,37 @@ export function formatRsvpText(rsvp: Rsvp, dateLabel: string): string {
   return lines.join("\n");
 }
 
-export type WhatsappRecipient = { phone: string; apikey: string };
-
-// Parses "phone:apikey,phone:apikey" into structured recipients.
-// Phone digits and the apikey are split on the FIRST colon only.
-export function parseWhatsappRecipients(raw: string | undefined): WhatsappRecipient[] {
+// Parses a comma-separated list of phone numbers (e.g. recipients or a single
+// "from"). Numbers keep their leading "+". Blank entries are dropped.
+export function parsePhoneList(raw: string | undefined): string[] {
   if (!raw) return [];
   return raw
     .split(",")
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .map((entry) => {
-      const idx = entry.indexOf(":");
-      if (idx === -1) return null;
-      const phone = entry.slice(0, idx).trim();
-      const apikey = entry.slice(idx + 1).trim();
-      if (!phone || !apikey) return null;
-      return { phone, apikey };
-    })
-    .filter((r): r is WhatsappRecipient => r !== null);
+    .map((p) => p.trim())
+    .filter(Boolean);
 }
 
-// Builds the CallMeBot WhatsApp send URL for one recipient.
-export function callMeBotUrl(r: WhatsappRecipient, text: string): string {
-  const params = new URLSearchParams({
-    phone: r.phone,
-    text,
-    apikey: r.apikey,
+// Ensures a number is in Twilio's WhatsApp channel form: "whatsapp:+<digits>".
+export function toWhatsappAddress(phone: string): string {
+  const p = phone.trim();
+  return p.startsWith("whatsapp:") ? p : `whatsapp:${p}`;
+}
+
+export function twilioEndpoint(accountSid: string): string {
+  return `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+}
+
+// Builds the x-www-form-urlencoded body for one Twilio WhatsApp message.
+export function twilioMessageBody(from: string, to: string, text: string): URLSearchParams {
+  return new URLSearchParams({
+    From: toWhatsappAddress(from),
+    To: toWhatsappAddress(to),
+    Body: text,
   });
-  return `https://api.callmebot.com/whatsapp.php?${params.toString()}`;
+}
+
+// HTTP Basic auth header value for the Twilio REST API.
+export function twilioAuthHeader(accountSid: string, authToken: string): string {
+  const encoded = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
+  return `Basic ${encoded}`;
 }

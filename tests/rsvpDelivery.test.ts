@@ -1,8 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
   formatRsvpText,
-  parseWhatsappRecipients,
-  callMeBotUrl,
+  parsePhoneList,
+  toWhatsappAddress,
+  twilioEndpoint,
+  twilioMessageBody,
+  twilioAuthHeader,
 } from "@/lib/rsvpDelivery";
 
 const DATE = "Saturday, August 29, 2026";
@@ -31,45 +34,52 @@ describe("formatRsvpText", () => {
   });
 });
 
-describe("parseWhatsappRecipients", () => {
+describe("parsePhoneList", () => {
   it("returns [] for undefined or empty", () => {
-    expect(parseWhatsappRecipients(undefined)).toEqual([]);
-    expect(parseWhatsappRecipients("")).toEqual([]);
-    expect(parseWhatsappRecipients("  ")).toEqual([]);
+    expect(parsePhoneList(undefined)).toEqual([]);
+    expect(parsePhoneList("")).toEqual([]);
+    expect(parsePhoneList("  ")).toEqual([]);
   });
 
-  it("parses a single recipient", () => {
-    expect(parseWhatsappRecipients("96170123456:abc123")).toEqual([
-      { phone: "96170123456", apikey: "abc123" },
-    ]);
-  });
-
-  it("parses multiple recipients and trims whitespace", () => {
-    expect(parseWhatsappRecipients("111:k1, 222:k2")).toEqual([
-      { phone: "111", apikey: "k1" },
-      { phone: "222", apikey: "k2" },
-    ]);
-  });
-
-  it("splits on the first colon only (apikey may contain colons)", () => {
-    expect(parseWhatsappRecipients("111:a:b:c")).toEqual([
-      { phone: "111", apikey: "a:b:c" },
-    ]);
-  });
-
-  it("drops malformed entries", () => {
-    expect(parseWhatsappRecipients("nocolon, 111:k1, :nophone, 222:")).toEqual([
-      { phone: "111", apikey: "k1" },
+  it("parses and trims a comma-separated list", () => {
+    expect(parsePhoneList("+96176466341, +96179174361")).toEqual([
+      "+96176466341",
+      "+96179174361",
     ]);
   });
 });
 
-describe("callMeBotUrl", () => {
-  it("builds an encoded CallMeBot URL", () => {
-    const url = callMeBotUrl({ phone: "111", apikey: "k1" }, "hello world\nline2");
-    expect(url).toContain("https://api.callmebot.com/whatsapp.php?");
-    expect(url).toContain("phone=111");
-    expect(url).toContain("apikey=k1");
-    expect(url).toContain("text=hello+world%0Aline2");
+describe("toWhatsappAddress", () => {
+  it("prefixes a bare number", () => {
+    expect(toWhatsappAddress("+9617646")).toBe("whatsapp:+9617646");
+  });
+  it("leaves an already-prefixed number unchanged", () => {
+    expect(toWhatsappAddress("whatsapp:+9617646")).toBe("whatsapp:+9617646");
+  });
+});
+
+describe("twilioEndpoint", () => {
+  it("builds the Messages endpoint for the account", () => {
+    expect(twilioEndpoint("AC123")).toBe(
+      "https://api.twilio.com/2010-04-01/Accounts/AC123/Messages.json",
+    );
+  });
+});
+
+describe("twilioMessageBody", () => {
+  it("encodes From, To (whatsapp-prefixed) and Body", () => {
+    const b = twilioMessageBody("+14155238886", "+96176466341", "hi\nthere");
+    expect(b.get("From")).toBe("whatsapp:+14155238886");
+    expect(b.get("To")).toBe("whatsapp:+96176466341");
+    expect(b.get("Body")).toBe("hi\nthere");
+    expect(b.toString()).toContain("Body=hi%0Athere");
+  });
+});
+
+describe("twilioAuthHeader", () => {
+  it("builds a Basic auth header from sid:token", () => {
+    expect(twilioAuthHeader("AC123", "secret")).toBe(
+      "Basic " + Buffer.from("AC123:secret").toString("base64"),
+    );
   });
 });

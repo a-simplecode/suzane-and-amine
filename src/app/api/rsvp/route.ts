@@ -2,15 +2,17 @@ import { NextResponse } from "next/server";
 import { parseRsvp } from "@/lib/rsvp";
 import {
   formatRsvpText,
-  parseWhatsappRecipients,
-  callMeBotUrl,
+  parsePhoneList,
+  twilioEndpoint,
+  twilioMessageBody,
+  twilioAuthHeader,
 } from "@/lib/rsvpDelivery";
 import { EVENT } from "@/data/event";
 
 // Public, unauthenticated endpoint. No rate limiting — acceptable for a
 // low-traffic invite-only wedding site. RSVPs are delivered two ways:
 //   1. Appended as a row to a Google Sheet (durable record).
-//   2. Pushed as a WhatsApp message via CallMeBot (best-effort notification).
+//   2. Pushed as a WhatsApp message via Twilio (best-effort notification).
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -25,13 +27,20 @@ export async function POST(request: Request) {
   }
 
   const rsvp = parsed.value;
-  const text = formatRsvpText(rsvp, `${EVENT.coupleNames[0]} & ${EVENT.coupleNames[1]} · ${EVENT.dateLabel}`);
+  const text = formatRsvpText(
+    rsvp,
+    `${EVENT.coupleNames[0]} & ${EVENT.coupleNames[1]} · ${EVENT.dateLabel}`,
+  );
 
   const sheetUrl = process.env.SHEET_WEBHOOK_URL;
-  const recipients = parseWhatsappRecipients(process.env.WHATSAPP_RECIPIENTS);
+  const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+  const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+  const twilioFrom = process.env.TWILIO_WHATSAPP_FROM;
+  const twilioTo = parsePhoneList(process.env.TWILIO_WHATSAPP_TO);
+  const twilioReady = Boolean(twilioSid && twilioToken && twilioFrom && twilioTo.length);
 
   // Nothing configured (e.g. local/dev): accept and log, don't fail the guest.
-  if (!sheetUrl && recipients.length === 0) {
+  if (!sheetUrl && !twilioReady) {
     console.log("[rsvp] (delivery not configured)\n" + text);
     return NextResponse.json({ ok: true, queued: true });
   }
@@ -66,17 +75,30 @@ export async function POST(request: Request) {
     }
   }
 
-  // 2. WhatsApp — best-effort. Failures are logged, never block the guest.
-  await Promise.allSettled(
-    recipients.map(async (r) => {
-      try {
-        const res = await fetch(callMeBotUrl(r, text), { method: "GET" });
-        if (!res.ok) console.error("[rsvp] whatsapp failed", r.phone, res.status);
-      } catch (e) {
-        console.error("[rsvp] whatsapp error", r.phone, e);
-      }
-    }),
-  );
+  // 2. WhatsApp via Twilio — best-effort. Failures are logged, never block.
+  if (twilioReady) {
+    const endpoint = twilioEndpoint(twilioSid!);
+    const auth = twilioAuthHeader(twilioSid!, twilioToken!);
+    await Promise.allSettled(
+      twilioTo.map(async (to) => {
+        try {
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              Authorization: auth,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: twilioMessageBody(twilioFrom!, to, text).toString(),
+          });
+          if (!res.ok) {
+            console.error("[rsvp] whatsapp failed", to, res.status, await res.text());
+          }
+        } catch (e) {
+          console.error("[rsvp] whatsapp error", to, e);
+        }
+      }),
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }
