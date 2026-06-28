@@ -1,88 +1,11 @@
 @import "tailwindcss";
 
-:root {
-  --bg-beige: #f1e9da;
-  --bg-beige-warm: #e8dfc9;
-  --ink-olive-deep: #2f3a22;
-  --accent-olive: #6b7a4b;
-  --accent-olive-soft: #8b9968;
-  --accent-gold: #c8a96a;
-  /* dark candlelit stage so the beige paper objects pop */
-  --stage-lit: #3a4429;
-  --stage-mid: #232a18;
-  --stage-dark: #11150c;
+@theme {
+  --color-cream: #f3f1e9;
+  --color-sage: #8a9a7b;
+  --color-deepsage: #4a5742;
+  --color-ink: #2e332b;
 }
 
-@theme inline {
-  --color-bg-beige: var(--bg-beige);
-  --color-bg-beige-warm: var(--bg-beige-warm);
-  --color-ink-olive-deep: var(--ink-olive-deep);
-  --color-accent-olive: var(--accent-olive);
-  --color-accent-olive-soft: var(--accent-olive-soft);
-  --color-accent-gold: var(--accent-gold);
-  --color-stage-lit: var(--stage-lit);
-  --color-stage-mid: var(--stage-mid);
-  --color-stage-dark: var(--stage-dark);
-  --font-display: var(--font-display);
-  --font-sans: var(--font-sans);
-}
-
-html,
-body {
-  background:
-    radial-gradient(125% 95% at 50% 36%, var(--stage-lit) 0%, var(--stage-mid) 46%, var(--stage-dark) 100%)
-      fixed;
-  color: var(--bg-beige);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  overscroll-behavior: none;
-}
-
-.font-display {
-  font-family: var(--font-display), Georgia, serif;
-  letter-spacing: 0.02em;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
-}
-
-/* Film grain over everything (canvas + DOM). Pure CSS, ~0 cost. */
-.grain-overlay {
-  position: fixed;
-  inset: -100px;
-  z-index: 40;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain-shift 0.9s steps(4) infinite;
-}
-
-@keyframes grain-shift {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(-30px, 18px); }
-  50% { transform: translate(22px, -26px); }
-  75% { transform: translate(-14px, -8px); }
-  100% { transform: translate(0, 0); }
-}
-
-.scroll-hint-line {
-  width: 1px;
-  height: 44px;
-  background: linear-gradient(to bottom, transparent, var(--accent-olive));
-  animation: hint-drop 1.8s ease-in-out infinite;
-}
-
-@keyframes hint-drop {
-  0% { transform: scaleY(0); transform-origin: top; }
-  45% { transform: scaleY(1); transform-origin: top; }
-  55% { transform: scaleY(1); transform-origin: bottom; }
-  100% { transform: scaleY(0); transform-origin: bottom; }
-}
+html { scroll-behavior: smooth; }
+body { background: var(--color-cream); color: var(--color-ink); }

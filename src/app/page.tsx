@@ -1,5 +1,3 @@
-import { InvalidInvite } from "@/components/InvalidInvite";
-
 export default function Page() {
-  return <InvalidInvite />;
+  return <main>Wedding site</main>;
 }
