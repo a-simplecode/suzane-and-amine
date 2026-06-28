@@ -1,5 +1,8 @@
 import { EVENT } from "@/data/event";
 
+export const MAX_NAME_LENGTH = 100;
+export const MAX_MESSAGE_LENGTH = 500;
+
 export type RsvpInput = {
   headcount: number;
   names: string[];
@@ -40,9 +43,16 @@ export function parseRsvp(input: unknown): ParseResult {
     if (typeof n !== "string" || n.trim().length === 0) {
       return { ok: false, error: "Guest names cannot be blank." };
     }
-    trimmedNames.push(n.trim());
+    const trimmed = n.trim();
+    if (trimmed.length > MAX_NAME_LENGTH) {
+      return { ok: false, error: "Guest names are too long." };
+    }
+    trimmedNames.push(trimmed);
   }
   const msg = typeof message === "string" ? message.trim() : "";
+  if (msg.length > MAX_MESSAGE_LENGTH) {
+    return { ok: false, error: "Message is too long." };
+  }
 
   return {
     ok: true,

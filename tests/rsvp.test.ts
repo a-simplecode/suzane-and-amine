@@ -41,4 +41,35 @@ describe("parseRsvp", () => {
       expect(r.value.message).toBe("hi");
     }
   });
+
+  it("rejects non-object input", () => {
+    expect(parseRsvp(null).ok).toBe(false);
+    expect(parseRsvp("nope").ok).toBe(false);
+    expect(parseRsvp(42).ok).toBe(false);
+  });
+
+  it("rejects non-integer headcount", () => {
+    expect(parseRsvp({ headcount: 1.5, names: ["x"], message: "" }).ok).toBe(false);
+    expect(parseRsvp({ headcount: NaN, names: [], message: "" }).ok).toBe(false);
+  });
+
+  it("rejects non-string name elements", () => {
+    expect(parseRsvp({ headcount: 1, names: [123], message: "" }).ok).toBe(false);
+    expect(parseRsvp({ headcount: 1, names: [null], message: "" }).ok).toBe(false);
+  });
+
+  it("rejects headcount exactly one over the max", () => {
+    const r = parseRsvp({ headcount: 9, names: Array(9).fill("x"), message: "" });
+    expect(r.ok).toBe(false);
+  });
+
+  it("rejects an over-long name", () => {
+    const r = parseRsvp({ headcount: 1, names: ["a".repeat(101)], message: "" });
+    expect(r.ok).toBe(false);
+  });
+
+  it("rejects an over-long message", () => {
+    const r = parseRsvp({ headcount: 0, names: [], message: "x".repeat(501) });
+    expect(r.ok).toBe(false);
+  });
 });

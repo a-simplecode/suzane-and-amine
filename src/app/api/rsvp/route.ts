@@ -3,6 +3,9 @@ import { Resend } from "resend";
 import { parseRsvp } from "@/lib/rsvp";
 import { EVENT } from "@/data/event";
 
+// NOTE: This is a public, unauthenticated endpoint. There is no rate limiting —
+// acceptable for a low-traffic invite-only wedding site, but if abuse becomes a
+// concern, add throttling (e.g. @upstash/ratelimit) before it sends email.
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -18,7 +21,9 @@ export async function POST(request: Request) {
 
   const { headcount, names, message, attending } = parsed.value;
   const subject = attending
-    ? `RSVP: ${names[0]} (+${headcount - 1}) is coming 🎉`
+    ? headcount === 1
+      ? `RSVP: ${names[0]} is coming 🎉`
+      : `RSVP: ${names[0]} (+${headcount - 1}) is coming 🎉`
     : `RSVP: regrets`;
   const text = [
     `Attending: ${attending ? "Yes" : "No"}`,
