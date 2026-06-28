@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 export function Reveal({
   children,
   delay = 0,
-  y = 28,
+  y = 32,
   className,
 }: {
   children: ReactNode;
@@ -18,8 +18,8 @@ export function Reveal({
       className={className}
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ type: "spring", stiffness: 90, damping: 16, delay }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ type: "spring", stiffness: 52, damping: 18, mass: 1.1, delay }}
     >
       {children}
     </motion.div>
