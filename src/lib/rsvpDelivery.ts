@@ -36,12 +36,41 @@ export function twilioEndpoint(accountSid: string): string {
   return `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
 }
 
-// Builds the x-www-form-urlencoded body for one Twilio WhatsApp message.
+// Builds the x-www-form-urlencoded body for a free-text Twilio WhatsApp message.
+// Only delivers inside a 24h session window — use the template body for
+// business-initiated alerts.
 export function twilioMessageBody(from: string, to: string, text: string): URLSearchParams {
   return new URLSearchParams({
     From: toWhatsappAddress(from),
     To: toWhatsappAddress(to),
     Body: text,
+  });
+}
+
+// Variables for the approved "rsvp_alert_v2" template, which uses a single
+// {{1}} carrying the whole details block (Meta rejects too many variables for
+// the body length). Always non-empty — the status line is always present.
+export function buildRsvpVariables(rsvp: Rsvp): Record<string, string> {
+  const parts = [
+    `${rsvp.attending ? "Attending" : "Not attending"} · ${rsvp.headcount} guest${rsvp.headcount === 1 ? "" : "s"}`,
+  ];
+  if (rsvp.names.length) parts.push(`Guests: ${rsvp.names.join(", ")}`);
+  if (rsvp.message) parts.push(`Message: ${rsvp.message}`);
+  return { "1": parts.join("\n") };
+}
+
+// Builds the x-www-form-urlencoded body for a Twilio WhatsApp template message.
+export function twilioTemplateBody(
+  from: string,
+  to: string,
+  contentSid: string,
+  variables: Record<string, string>,
+): URLSearchParams {
+  return new URLSearchParams({
+    From: toWhatsappAddress(from),
+    To: toWhatsappAddress(to),
+    ContentSid: contentSid,
+    ContentVariables: JSON.stringify(variables),
   });
 }
 

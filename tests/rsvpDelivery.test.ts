@@ -5,6 +5,8 @@ import {
   toWhatsappAddress,
   twilioEndpoint,
   twilioMessageBody,
+  twilioTemplateBody,
+  buildRsvpVariables,
   twilioAuthHeader,
 } from "@/lib/rsvpDelivery";
 
@@ -73,6 +75,36 @@ describe("twilioMessageBody", () => {
     expect(b.get("To")).toBe("whatsapp:+96176466341");
     expect(b.get("Body")).toBe("hi\nthere");
     expect(b.toString()).toContain("Body=hi%0Athere");
+  });
+});
+
+describe("buildRsvpVariables", () => {
+  it("packs an attending RSVP into a single {{1}} details block", () => {
+    expect(
+      buildRsvpVariables({ attending: true, headcount: 2, names: ["Suzane", "Amine"], message: "Yay" }),
+    ).toEqual({ "1": "Attending · 2 guests\nGuests: Suzane, Amine\nMessage: Yay" });
+  });
+
+  it("omits guests/message lines when empty and singularizes 1 guest", () => {
+    expect(
+      buildRsvpVariables({ attending: true, headcount: 1, names: ["Amine"], message: "" }),
+    ).toEqual({ "1": "Attending · 1 guest\nGuests: Amine" });
+  });
+
+  it("handles regrets", () => {
+    expect(
+      buildRsvpVariables({ attending: false, headcount: 0, names: [], message: "" }),
+    ).toEqual({ "1": "Not attending · 0 guests" });
+  });
+});
+
+describe("twilioTemplateBody", () => {
+  it("encodes From, To, ContentSid and ContentVariables", () => {
+    const b = twilioTemplateBody("+14155238886", "+96176466341", "HX123", { "1": "Attending", "2": "2" });
+    expect(b.get("From")).toBe("whatsapp:+14155238886");
+    expect(b.get("To")).toBe("whatsapp:+96176466341");
+    expect(b.get("ContentSid")).toBe("HX123");
+    expect(b.get("ContentVariables")).toBe('{"1":"Attending","2":"2"}');
   });
 });
 

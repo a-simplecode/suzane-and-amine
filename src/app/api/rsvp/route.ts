@@ -4,7 +4,8 @@ import {
   formatRsvpText,
   parsePhoneList,
   twilioEndpoint,
-  twilioMessageBody,
+  twilioTemplateBody,
+  buildRsvpVariables,
   twilioAuthHeader,
 } from "@/lib/rsvpDelivery";
 import { EVENT } from "@/data/event";
@@ -37,7 +38,10 @@ export async function POST(request: Request) {
   const twilioToken = process.env.TWILIO_AUTH_TOKEN;
   const twilioFrom = process.env.TWILIO_WHATSAPP_FROM;
   const twilioTo = parsePhoneList(process.env.TWILIO_WHATSAPP_TO);
-  const twilioReady = Boolean(twilioSid && twilioToken && twilioFrom && twilioTo.length);
+  const twilioContentSid = process.env.TWILIO_CONTENT_SID;
+  const twilioReady = Boolean(
+    twilioSid && twilioToken && twilioFrom && twilioContentSid && twilioTo.length,
+  );
 
   // Nothing configured (e.g. local/dev): accept and log, don't fail the guest.
   if (!sheetUrl && !twilioReady) {
@@ -75,10 +79,11 @@ export async function POST(request: Request) {
     }
   }
 
-  // 2. WhatsApp via Twilio — best-effort. Failures are logged, never block.
+  // 2. WhatsApp via Twilio template — best-effort. Failures are logged, never block.
   if (twilioReady) {
     const endpoint = twilioEndpoint(twilioSid!);
     const auth = twilioAuthHeader(twilioSid!, twilioToken!);
+    const variables = buildRsvpVariables(rsvp);
     await Promise.allSettled(
       twilioTo.map(async (to) => {
         try {
@@ -88,7 +93,7 @@ export async function POST(request: Request) {
               Authorization: auth,
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: twilioMessageBody(twilioFrom!, to, text).toString(),
+            body: twilioTemplateBody(twilioFrom!, to, twilioContentSid!, variables).toString(),
           });
           if (!res.ok) {
             console.error("[rsvp] whatsapp failed", to, res.status, await res.text());
