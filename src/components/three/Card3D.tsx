@@ -26,10 +26,15 @@ export function Card3D({ tl }: { tl: RefObject<Timeline> }) {
     // back (solid) just before the fold, then crossfades into the paper plane.
     let alpha = 1;
     if (t.intro >= 1) {
-      alpha =
-        t.p < BEATS.fold[0]
-          ? smooth(seg(t.p, BEATS.fold[0] - 0.04, BEATS.fold[0])) // reappear pre-fold
-          : 1 - smooth(seg(foldT, 0.42, 0.55)); // crossfade out into the plane
+      if (t.p < BEATS.fold[0]) {
+        // stay up at intro-end, fade out only as the first photo emerges,
+        // then reappear (solid) just before the fold
+        const out = smooth(seg(t.p, 0.012, 0.038));
+        const back = smooth(seg(t.p, BEATS.fold[0] - 0.04, BEATS.fold[0]));
+        alpha = Math.max(1 - out, back);
+      } else {
+        alpha = 1 - smooth(seg(foldT, 0.42, 0.55)); // crossfade into the plane
+      }
     }
     g.visible = t.opened && foldT < 0.55 && alpha > 0.01;
     if (!g.visible) return;

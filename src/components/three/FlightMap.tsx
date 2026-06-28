@@ -36,6 +36,7 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
   const vanAvatars = useRef<THREE.Group>(null);
   const trailRef = useRef<THREE.Line>(null);
   const house = useRef<THREE.Group>(null);
+  const homeAvatars = useRef<THREE.Group>(null);
   const car = useRef<THREE.Group>(null);
   const planeShadow = useRef<THREE.Mesh>(null);
   const carTmp = useMemo(
@@ -101,10 +102,10 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
     g.visible = t.opened && t.p > BEATS.fold[0] - 0.02;
     if (!g.visible) return;
 
-    // world-scale props (map, trail dashes, city dots) misread at decal
-    // zoom — true-scale Cyprus next to the 6× Lebanon decal looks like a
-    // stray blob — so everything world-scale fades out during the landing
-    const zoomFade = 1 - smooth(seg(t.p, BEATS.land[0], BEATS.land[0] + 0.05));
+    // world-scale props fade out only AFTER the close-up decal is already
+    // opaque on top of them (the decal is lifted above the world map), so the
+    // swap reads clean instead of two textured planes blended together
+    const zoomFade = 1 - smooth(seg(t.p, BEATS.land[0] + 0.02, BEATS.land[0] + 0.05));
 
     // map fades in as the camera pulls up for the fold, out at decal zoom
     if (mapMat.current) {
@@ -158,9 +159,9 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
     const landT = seg(t.p, BEATS.land[0], BEATS.land[1]);
     const driveT = seg(t.p, BEATS.drive[0], BEATS.drive[1]);
     const at = seg(t.p, BEATS.arrive[0], BEATS.arrive[1]);
-    // decal zooms in only once the landing begins, so the flight stays a
-    // clean plane-over-world-map shot (no giant plane over the close-up)
-    const decalIn = smooth(seg(t.p, BEATS.land[0] - 0.005, BEATS.land[0] + 0.07));
+    // decal leads in fast (and is lifted above + opaque) as the landing
+    // begins, so it covers the world map before that fades out beneath it
+    const decalIn = smooth(seg(t.p, BEATS.land[0] - 0.01, BEATS.land[0] + 0.03));
     if (decalMat.current) decalMat.current.opacity = decalIn;
     if (decalShadowMat.current) decalShadowMat.current.opacity = 0.18 * decalIn;
 
@@ -169,6 +170,17 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
       const hs = easeOut3(seg(landT, 0.25, 0.65));
       house.current.visible = hs > 0;
       house.current.scale.setScalar(Math.max(0.001, hs));
+    }
+
+    // home avatars greet at the landing, then fade as the car sets off (the
+    // drive camera follows close from the house — they'd otherwise loom huge)
+    if (homeAvatars.current) {
+      const a = 1 - smooth(seg(t.p, BEATS.drive[0] - 0.03, BEATS.drive[0] + 0.01));
+      homeAvatars.current.visible = a > 0.01;
+      homeAvatars.current.traverse((n) => {
+        const mesh = n as THREE.Mesh;
+        if (mesh.isMesh) (mesh.material as THREE.MeshBasicMaterial).opacity = a;
+      });
     }
 
     // wedding car: parked at the house after landing, drives during the
@@ -284,11 +296,13 @@ export function FlightMap({ tl }: { tl: RefObject<Timeline> }) {
           <boxGeometry args={[0.0048, 0.0048, 0.001]} />
           <meshStandardMaterial color="#8a8266" roughness={0.7} />
         </mesh>
-        <MapAvatar position={[-0.012, 0.05, 0]} which={0} size={0.03} />
-        <MapAvatar position={[0.012, 0.05, 0]} which={1} size={0.03} />
+        <group ref={homeAvatars}>
+          <MapAvatar position={[-0.012, 0.05, 0]} which={0} size={0.03} />
+          <MapAvatar position={[0.012, 0.05, 0]} which={1} size={0.03} />
+        </group>
       </group>
       {/* wedding car — olive body, white ribbon V + bow on the hood */}
-      <group ref={car} visible={false} scale={0.75}>
+      <group ref={car} visible={false} scale={3.0}>
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.0008, 0]}>
           <circleGeometry args={[0.013, 20]} />
           <meshBasicMaterial color="#2f3a22" transparent opacity={0.13} depthWrite={false} />

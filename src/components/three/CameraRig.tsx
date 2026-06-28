@@ -68,27 +68,34 @@ export function CameraRig({ tl }: { tl: RefObject<Timeline> }) {
       const ft = smooth(Math.min(1, flightT));
       FLIGHT_CURVE.getPointAt(ft, tmp.pp);
       FLIGHT_CURVE.getTangentAt(ft, tmp.tan).normalize();
-      tmp.pos.copy(tmp.pp).addScaledVector(tmp.tan, -5.4);
-      tmp.pos.setY(tmp.pos.y + 2.1);
-      tmp.lk.copy(tmp.pp).addScaledVector(tmp.tan, 2.0);
+      // pulled further back + higher so the dart reads as a small craft over
+      // the map, not a chunky slab filling the frame
+      tmp.pos.copy(tmp.pp).addScaledVector(tmp.tan, -6.6);
+      tmp.pos.setY(tmp.pos.y + 2.8);
+      tmp.lk.copy(tmp.pp).addScaledVector(tmp.tan, 2.4);
     } else if (driveT <= 0) {
       // settle over Suzane's home as the plane lands — stays map-like,
       // mostly top-down so the cartography reads instead of raw geometry.
       // aFac pushes the camera higher on narrow (portrait) screens, where
       // the horizontal field is small and markers otherwise loom huge.
       const aFac = Math.max(1, 0.72 / pc.aspect);
+      // mostly top-down (small x/z offset) so the close-up decal reads as a
+      // map from above instead of an oblique wall of olive shapes
       tmp.pos.set(
-        HOME_PIN.x + lerp(0.3, 0.04, landT),
-        HOME_PIN.y + lerp(1.7, 0.5 * aFac, landT),
-        HOME_PIN.z + lerp(0.9, 0.2 * aFac, landT),
+        HOME_PIN.x + lerp(0.08, 0.03, landT),
+        HOME_PIN.y + lerp(1.4, 0.62 * aFac, landT),
+        HOME_PIN.z + lerp(0.22, 0.14 * aFac, landT),
       );
       tmp.lk.copy(HOME_PIN);
     } else if (arriveT <= 0) {
-      // high follow over the wedding car along the coastal road
+      // follow the wedding car closely along the coastal road. The road is
+      // only ~0.1 units long at decal scale, so the camera sits low over it
+      // (the old 0.46 offset framed the whole region and shrank the car to a
+      // speck).
       const aFac = Math.max(1, 0.72 / pc.aspect);
       const d = smooth(Math.min(1, driveT));
       ROAD_CURVE.getPointAt(d, tmp.pp);
-      tmp.pos.set(tmp.pp.x + 0.03, tmp.pp.y + 0.46 * aFac, tmp.pp.z + 0.18 * aFac);
+      tmp.pos.set(tmp.pp.x + 0.02, tmp.pp.y + 0.12 * aFac, tmp.pp.z + 0.05 * aFac);
       tmp.lk.copy(tmp.pp);
     } else {
       // settle onto the venue pin

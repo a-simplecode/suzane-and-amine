@@ -80,11 +80,11 @@ export function Polaroids({ tl }: { tl: RefObject<Timeline> }) {
       if (!child.visible) return;
 
       const ken = smooth(tt) * 0.04; // gentle hold-phase push
-      child.scale.setScalar(lerp(0.5, 1, enter) * (1 + ken) * (1 - exit * 0.08));
+      child.scale.setScalar(lerp(0.72, 1, enter) * (1 + ken) * (1 - exit * 0.08));
       child.position.set(
         rig.dir * (tt - 0.5) * 0.16, // gentle lateral drift
-        lerp(-0.55, 0.1, enter) + exit * 0.3, // rise out of the invitation, ease away
-        lerp(2.0, 3.3, enter), // drawn forward toward the viewer
+        lerp(-0.32, 0.1, enter) + exit * 0.3, // rise out of the invitation, ease away
+        lerp(2.6, 3.3, enter), // drawn forward toward the viewer
       );
       child.rotation.z = rig.rot * (1 - enter * 0.6);
 
