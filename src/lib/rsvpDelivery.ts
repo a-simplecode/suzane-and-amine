@@ -49,14 +49,20 @@ export function twilioMessageBody(from: string, to: string, text: string): URLSe
 
 // Variables for the approved "rsvp_alert_v2" template, which uses a single
 // {{1}} carrying the whole details block (Meta rejects too many variables for
-// the body length). Always non-empty — the status line is always present.
+// the body length). WhatsApp template parameters cannot contain newlines, tabs,
+// or 5+ consecutive spaces — so the value is single-line and sanitized.
 export function buildRsvpVariables(rsvp: Rsvp): Record<string, string> {
   const parts = [
-    `${rsvp.attending ? "Attending" : "Not attending"} · ${rsvp.headcount} guest${rsvp.headcount === 1 ? "" : "s"}`,
+    `${rsvp.attending ? "Attending" : "Not attending"} - ${rsvp.headcount} guest${rsvp.headcount === 1 ? "" : "s"}`,
   ];
   if (rsvp.names.length) parts.push(`Guests: ${rsvp.names.join(", ")}`);
   if (rsvp.message) parts.push(`Message: ${rsvp.message}`);
-  return { "1": parts.join("\n") };
+  const value = parts
+    .join(" | ")
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s{4,}/g, "   ")
+    .trim();
+  return { "1": value };
 }
 
 // Builds the x-www-form-urlencoded body for a Twilio WhatsApp template message.

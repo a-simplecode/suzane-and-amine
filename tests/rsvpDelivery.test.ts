@@ -79,22 +79,33 @@ describe("twilioMessageBody", () => {
 });
 
 describe("buildRsvpVariables", () => {
-  it("packs an attending RSVP into a single {{1}} details block", () => {
+  it("packs an attending RSVP into a single-line {{1}} value", () => {
     expect(
       buildRsvpVariables({ attending: true, headcount: 2, names: ["Suzane", "Amine"], message: "Yay" }),
-    ).toEqual({ "1": "Attending · 2 guests\nGuests: Suzane, Amine\nMessage: Yay" });
+    ).toEqual({ "1": "Attending - 2 guests | Guests: Suzane, Amine | Message: Yay" });
   });
 
-  it("omits guests/message lines when empty and singularizes 1 guest", () => {
+  it("omits guests/message when empty and singularizes 1 guest", () => {
     expect(
       buildRsvpVariables({ attending: true, headcount: 1, names: ["Amine"], message: "" }),
-    ).toEqual({ "1": "Attending · 1 guest\nGuests: Amine" });
+    ).toEqual({ "1": "Attending - 1 guest | Guests: Amine" });
   });
 
   it("handles regrets", () => {
     expect(
       buildRsvpVariables({ attending: false, headcount: 0, names: [], message: "" }),
-    ).toEqual({ "1": "Not attending · 0 guests" });
+    ).toEqual({ "1": "Not attending - 0 guests" });
+  });
+
+  it("strips newlines/tabs from a multi-line message", () => {
+    const v = buildRsvpVariables({
+      attending: true,
+      headcount: 1,
+      names: ["Amine"],
+      message: "line1\n\nline2\ttab",
+    })["1"];
+    expect(v).not.toMatch(/[\r\n\t]/);
+    expect(v).toContain("line1 line2 tab");
   });
 });
 
