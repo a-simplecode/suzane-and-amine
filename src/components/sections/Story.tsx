@@ -1,6 +1,6 @@
 import { EVENT } from "@/data/event";
 import { Reveal } from "@/components/motion/Reveal";
-import { PhotoFrame } from "./PhotoFrame";
+import { StoryArt, SCENES } from "./StoryArt";
 
 export function Story() {
   return (
@@ -32,7 +32,7 @@ export function Story() {
                     className={left ? "md:order-1" : "md:order-2"}
                     y={40}
                   >
-                    <PhotoFrame src={beat.photo} alt={beat.title} />
+                    <StoryArt scene={SCENES[i] ?? "west"} />
                   </Reveal>
 
                   <Reveal
