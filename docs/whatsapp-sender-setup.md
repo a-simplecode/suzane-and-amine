@@ -6,17 +6,20 @@ Goal: replace the Twilio **sandbox** (72h re-arm limit) with a real WhatsApp
 Recipients (unchanged): +96176466341, +96179174361
 Sender: a NEW dedicated number (keeps personal/business WhatsApp untouched).
 
-## Status checklist
+## Status: COMPLETE ✅ (2026-06-29)
 
-- [ ] 1. Meta Business Manager account created
-- [ ] 2. Business verification submitted to Meta
-- [ ] 3. Twilio phone number purchased (SMS + WhatsApp capable)
-- [ ] 4. WhatsApp sender registered in Twilio (links Twilio ↔ Meta WABA)
-- [ ] 5. Display name approved by Meta
-- [ ] 6. Message template created + approved by Meta
-- [ ] 7. Code switched from free-text Body → approved template (ContentSid)
-- [ ] 8. `TWILIO_WHATSAPP_FROM` env updated to the new sender on Vercel
-- [ ] 9. Live end-to-end test → both phones receive
+- [x] 1. Meta Business Manager account created (Biz ID 237681843560033)
+- [x] 2. (Business verification not required for low-volume / 2 recipients)
+- [x] 3. Twilio number purchased: +1 825 793-3151
+- [x] 4. WhatsApp sender registered (WABA 1026548593203151); sender +15559581266
+- [x] 5. Display name approved ("Amine"), sender status Online
+- [x] 6. Template `rsvp_alert_v2` (HXe9352022e6e3e5887dac1c10186d184c) approved
+- [x] 7. Code sends via approved template (ContentSid + single-line ContentVariables)
+- [x] 8. `TWILIO_WHATSAPP_FROM=whatsapp:+15559581266` + `TWILIO_CONTENT_SID` set on Vercel
+- [x] 9. Live end-to-end test → both phones received (one confirmed "read")
+
+Note: WhatsApp template params cannot contain newlines/tabs (error 21656) —
+buildRsvpVariables sanitizes to a single line.
 
 ## Phase 1 — what Amine does now
 
